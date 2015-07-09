@@ -1,0 +1,3 @@
+[submodule "CarDashboardCore"]
+	path = CarDashboardCore
+	url = https://github.com/eclubprague/CarDashboardCore
