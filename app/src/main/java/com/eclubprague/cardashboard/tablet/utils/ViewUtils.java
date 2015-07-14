@@ -1,4 +1,4 @@
-package cz.blahami2.cardashboard.utils;
+package com.eclubprague.cardashboard.tablet.utils;
 
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -6,17 +6,19 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 /**
+ * Utility class for views.
+ *
  * Created by Michael on 14. 4. 2015.
  */
 public class ViewUtils {
 
     /**
-     * @param view
-     * @param left
-     * @param top
-     * @param right
-     * @param bottom
-     * @return
+     * @param view view to be adjusted
+     * @param left left margin in DP
+     * @param top top margin in DP
+     * @param right right margin in DP
+     * @param bottom bottom margin in DP
+     * @return adjusted view
      */
     public static View addMarginsInDp( View view, int left, int top, int right, int bottom ) {
         DisplayMetrics dm = view.getResources().getDisplayMetrics();

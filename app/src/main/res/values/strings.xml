@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">CarDashboardTablet</string>
+    <string name="title_activity_simple_pager">SimplePagerActivity</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_main">MainActivity</string>
 </resources>
