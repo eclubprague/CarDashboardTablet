@@ -4,9 +4,15 @@
     android:layout_height="match_parent"
     tools:context="com.eclubprague.cardashboard.tablet.fragments.SimplePageFragment">
 
-    <TextView
+    <GridView
+        android:id="@+id/fragment_page_grid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/textview"/>
+        android:columnWidth="@dimen/module_card_width"
+        android:numColumns="auto_fit"
+        android:verticalSpacing="@dimen/module_card_margin"
+        android:horizontalSpacing="@dimen/module_card_margin"
+        android:gravity="center"
+        android:layout_margin="@dimen/module_card_margin" />
 
 </FrameLayout>

@@ -6,45 +6,28 @@ import android.view.MenuItem;
 
 import com.eclubprague.cardashboard.core.modules.IModule;
 import com.eclubprague.cardashboard.core.modules.SimpleAbstractModule;
+import com.eclubprague.cardashboard.core.modules.models.resources.StringResource;
 import com.eclubprague.cardashboard.tablet.R;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends SimplePagerActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setModules(Arrays.<IModule>asList(
-            new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null),
-                new SimpleAbstractModule(null, null, null, null)
-        ));
+//        setModules(Arrays.<IModule>asList(
+//            new SimpleAbstractModule(null, null, null, null),
+//                new SimpleAbstractModule(null, null, null, null),
+//                new SimpleAbstractModule(null, null, null, null),
+//                new SimpleAbstractModule(null, null, null, null)
+//        ));
+        List<IModule> modules = new ArrayList<>();
+        for (int i = 0; i < 30; i++) {
+            modules.add(new SimpleAbstractModule(StringResource.fromString("module #" + i), null, null, null));
+        }
+        setModules(modules);
     }
 
     @Override

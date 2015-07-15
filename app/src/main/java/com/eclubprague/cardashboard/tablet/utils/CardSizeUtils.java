@@ -31,6 +31,26 @@ public class CardSizeUtils {
                 availableWidth / minWidthRequiredPerCard); // columns
     }
 
+    /**
+     * Returns Size containing maximum size of a card
+     *
+     * @param context         application context for resources access
+     * @param availableHeight available vertical space
+     * @param availableWidth  available horizontal space
+     * @return Size(width, height)
+     */
+    public static Size getOptimalCardSize(Context context, int availableHeight, int availableWidth) {
+        int margin = context.getResources().getDimensionPixelSize(R.dimen.module_card_margin);
+        int height = context.getResources().getDimensionPixelSize(R.dimen.module_card_height);
+        int width = context.getResources().getDimensionPixelSize(R.dimen.module_card_width);
+
+        Size tableSize = getTableSize(context, availableHeight, availableWidth);
+        availableHeight -= margin * (tableSize.height + 1);
+        availableWidth -= margin * (tableSize.width + 1);
+//        Log.d( getClass().getName(), "card height = " + availableHeight / tableSize.height + ", card width = " + availableWidth / tableSize.width );
+        return new Size(availableHeight / tableSize.height, availableWidth / tableSize.width);
+    }
+
 
     public static class Size {
         public final int height;

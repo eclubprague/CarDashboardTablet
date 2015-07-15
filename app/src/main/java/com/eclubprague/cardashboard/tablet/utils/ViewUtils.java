@@ -36,4 +36,12 @@ public class ViewUtils {
     public static View addMarginsInDp( View view, int margin ) {
         return addMarginsInDp( view, margin, margin );
     }
+
+    public static <T extends ViewGroup> View setSize(View view, int width, int height) {
+        T.LayoutParams params = view.getLayoutParams();
+        params.width = width;
+        params.height = height;
+        view.setLayoutParams(params);
+        return view;
+    }
 }

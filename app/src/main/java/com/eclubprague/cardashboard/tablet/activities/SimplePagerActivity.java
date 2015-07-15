@@ -3,13 +3,11 @@ package com.eclubprague.cardashboard.tablet.activities;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
 
@@ -20,7 +18,7 @@ import com.eclubprague.cardashboard.tablet.utils.CardSizeUtils;
 
 import java.util.List;
 
-abstract public class SimplePagerActivity extends FragmentActivity {
+abstract public class SimplePagerActivity extends FragmentActivity implements SimplePageFragment.OnPageFragmentInteractionListener {
 
     private ViewPager viewPager;
     private PagerAdapter pagerAdapter;
@@ -113,7 +111,11 @@ abstract public class SimplePagerActivity extends FragmentActivity {
     }
 
     private int getPageCount() {
-        return (int) Math.round(Math.ceil((double) modules.size() / getModulesPerPageCount()));
+        if (modules == null) {
+            return 0;
+        } else {
+            return (int) Math.round(Math.ceil((double) modules.size() / getModulesPerPageCount()));
+        }
     }
 
     private Fragment getPageFragment(int page) {
@@ -121,7 +123,8 @@ abstract public class SimplePagerActivity extends FragmentActivity {
             return null;
         }
         int start = page * getModulesPerPageCount();
-        return SimplePageFragment.newInstance(modules.subList(start, start + getModulesPerPageCount()), rowCount, columnCount);
+        int end = (modules.size() < start + getModulesPerPageCount()) ? modules.size() : start + getModulesPerPageCount();
+        return SimplePageFragment.newInstance(modules.subList(start, end), rowCount, columnCount);
     }
 
     public void setModules(List<IModule> modules) {
