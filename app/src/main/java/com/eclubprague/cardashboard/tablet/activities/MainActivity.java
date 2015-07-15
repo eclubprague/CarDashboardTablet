@@ -25,7 +25,7 @@ public class MainActivity extends SimplePagerActivity {
 //        ));
         List<IModule> modules = new ArrayList<>();
         for (int i = 0; i < 30; i++) {
-            modules.add(new SimpleAbstractModule(StringResource.fromString("module #" + i), null, null, null));
+            modules.add(new SimpleAbstractModule(StringResource.fromString("Goodle Maps #" + i), null, null, null));
         }
         setModules(modules);
     }
