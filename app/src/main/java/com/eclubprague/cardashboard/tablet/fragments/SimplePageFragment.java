@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 
-import com.eclubprague.cardashboard.core.modules.IModule;
+import com.eclubprague.cardashboard.core.modules.base.IModule;
 import com.eclubprague.cardashboard.core.views.ModuleViewFactory;
 import com.eclubprague.cardashboard.tablet.R;
 import com.eclubprague.cardashboard.tablet.utils.CardSizeUtils;

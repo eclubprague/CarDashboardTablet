@@ -11,7 +11,7 @@ import android.view.MenuItem;
 import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
 
-import com.eclubprague.cardashboard.core.modules.IModule;
+import com.eclubprague.cardashboard.core.modules.base.IModule;
 import com.eclubprague.cardashboard.tablet.R;
 import com.eclubprague.cardashboard.tablet.fragments.SimplePageFragment;
 import com.eclubprague.cardashboard.tablet.utils.CardSizeUtils;

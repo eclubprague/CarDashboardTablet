@@ -4,9 +4,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.eclubprague.cardashboard.core.modules.IModule;
-import com.eclubprague.cardashboard.core.modules.SimpleAbstractModule;
-import com.eclubprague.cardashboard.core.modules.models.resources.StringResource;
+import com.eclubprague.cardashboard.core.modules.TestModule;
+import com.eclubprague.cardashboard.core.modules.base.IModule;
+import com.eclubprague.cardashboard.core.modules.base.models.resources.IconResource;
+import com.eclubprague.cardashboard.core.modules.base.models.resources.StringResource;
 import com.eclubprague.cardashboard.tablet.R;
 
 import java.util.ArrayList;
@@ -24,8 +25,13 @@ public class MainActivity extends SimplePagerActivity {
 //                new SimpleAbstractModule(null, null, null, null)
 //        ));
         List<IModule> modules = new ArrayList<>();
-        for (int i = 0; i < 30; i++) {
-            modules.add(new SimpleAbstractModule(StringResource.fromString("Goodle Maps #" + i), null, null, null));
+        String gm = "Google maps";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 33; i++) {
+            sb.append(gm.charAt(i % gm.length()));
+            modules.add(new TestModule(StringResource.fromString(sb.toString()),
+                    IconResource.fromResourceId(com.eclubprague.cardashboard.core.R.drawable.ic_language_black_24dp),
+                    null, null));
         }
         setModules(modules);
     }

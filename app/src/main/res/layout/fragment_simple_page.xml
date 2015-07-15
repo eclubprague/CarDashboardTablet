@@ -13,6 +13,7 @@
         android:verticalSpacing="@dimen/module_card_margin"
         android:horizontalSpacing="@dimen/module_card_margin"
         android:gravity="center"
-        android:layout_margin="@dimen/module_card_margin" />
+        android:padding="@dimen/module_card_margin"
+        android:clipToPadding="false" />
 
 </FrameLayout>
