@@ -8,12 +8,12 @@
         android:id="@+id/fragment_page_grid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:columnWidth="@dimen/module_card_width"
+        android:columnWidth="@dimen/card_size"
         android:numColumns="auto_fit"
-        android:verticalSpacing="@dimen/module_card_margin"
-        android:horizontalSpacing="@dimen/module_card_margin"
+        android:verticalSpacing="@dimen/card_margin"
+        android:horizontalSpacing="@dimen/card_margin"
         android:gravity="center"
-        android:padding="@dimen/module_card_margin"
+        android:padding="@dimen/card_margin"
         android:clipToPadding="false" />
 
 </FrameLayout>

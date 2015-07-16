@@ -19,9 +19,9 @@ public class CardSizeUtils {
      * @return Size(columns, rows)
      */
     public static Size getTableSize(Context context, int availableHeight, int availableWidth){
-        int margin = context.getResources().getDimensionPixelSize(R.dimen.module_card_margin);
-        int height = context.getResources().getDimensionPixelSize(R.dimen.module_card_height);
-        int width = context.getResources().getDimensionPixelSize(R.dimen.module_card_width);
+        int margin = context.getResources().getDimensionPixelSize(R.dimen.card_margin);
+        int height = context.getResources().getDimensionPixelSize(R.dimen.card_size);
+        int width = context.getResources().getDimensionPixelSize(R.dimen.card_size);
 
         availableHeight -= margin; // top spacing
         availableWidth -= margin; // left spacing
@@ -40,9 +40,9 @@ public class CardSizeUtils {
      * @return Size(width, height)
      */
     public static Size getOptimalCardSize(Context context, int availableHeight, int availableWidth) {
-        int margin = context.getResources().getDimensionPixelSize(R.dimen.module_card_margin);
-        int height = context.getResources().getDimensionPixelSize(R.dimen.module_card_height);
-        int width = context.getResources().getDimensionPixelSize(R.dimen.module_card_width);
+        int margin = context.getResources().getDimensionPixelSize(R.dimen.card_margin);
+        int height = context.getResources().getDimensionPixelSize(R.dimen.card_size);
+        int width = context.getResources().getDimensionPixelSize(R.dimen.card_size);
 
         Size tableSize = getTableSize(context, availableHeight, availableWidth);
         availableHeight -= margin * (tableSize.height + 1);

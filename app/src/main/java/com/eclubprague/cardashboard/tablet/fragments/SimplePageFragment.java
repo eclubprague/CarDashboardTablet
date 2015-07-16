@@ -10,10 +10,8 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 
 import com.eclubprague.cardashboard.core.modules.base.IModule;
-import com.eclubprague.cardashboard.core.views.ModuleViewFactory;
 import com.eclubprague.cardashboard.tablet.R;
 import com.eclubprague.cardashboard.tablet.utils.CardSizeUtils;
-import com.eclubprague.cardashboard.tablet.utils.ViewUtils;
 
 import java.util.List;
 
@@ -156,8 +154,8 @@ public class SimplePageFragment extends Fragment {
             }
             if (convertView == null) {
                 IModule module = modules.get(position);
-                view = ModuleViewFactory.createPassiveWithHolder(getActivity(), R.layout.module_holder, parent, module.getIcon(), module.getTitle());
-                view = ViewUtils.setSize(view, getOptimalCardSize().width, getOptimalCardSize().height);
+                view = module.createViewWithHolder(getActivity(), R.layout.module_holder, parent);
+                //view = ViewUtils.setSize(view, getOptimalCardSize().width, getOptimalCardSize().height);
             } else {
                 view = convertView;
             }

@@ -4,14 +4,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.eclubprague.cardashboard.core.modules.TestModule;
-import com.eclubprague.cardashboard.core.modules.base.IModule;
-import com.eclubprague.cardashboard.core.modules.base.models.resources.IconResource;
-import com.eclubprague.cardashboard.core.modules.base.models.resources.StringResource;
+import com.eclubprague.cardashboard.core.modules.HomeScreenModule;
 import com.eclubprague.cardashboard.tablet.R;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends SimplePagerActivity {
 
@@ -19,21 +13,12 @@ public class MainActivity extends SimplePagerActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        setModules(Arrays.<IModule>asList(
-//            new SimpleAbstractModule(null, null, null, null),
-//                new SimpleAbstractModule(null, null, null, null),
-//                new SimpleAbstractModule(null, null, null, null),
-//                new SimpleAbstractModule(null, null, null, null)
+//            new AbstractSimpleModule(null, null, null, null),
+//                new AbstractSimpleModule(null, null, null, null),
+//                new AbstractSimpleModule(null, null, null, null),
+//                new AbstractSimpleModule(null, null, null, null)
 //        ));
-        List<IModule> modules = new ArrayList<>();
-        String gm = "Google maps";
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 33; i++) {
-            sb.append(gm.charAt(i % gm.length()));
-            modules.add(new TestModule(StringResource.fromString(sb.toString()),
-                    IconResource.fromResourceId(com.eclubprague.cardashboard.core.R.drawable.ic_language_black_24dp),
-                    null, null));
-        }
-        setModules(modules);
+        setModules(HomeScreenModule.getInstance().getSubmodules());
     }
 
     @Override
