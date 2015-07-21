@@ -10,7 +10,6 @@ import com.eclubprague.cardashboard.core.modules.base.IModule;
 import com.eclubprague.cardashboard.core.modules.base.ISubmenuModule;
 import com.eclubprague.cardashboard.core.modules.base.models.ModuleId;
 import com.eclubprague.cardashboard.core.modules.predefined.BackModule;
-import com.eclubprague.cardashboard.core.modules.predefined.HomeScreenModule;
 import com.eclubprague.cardashboard.tablet.R;
 
 import java.util.List;
@@ -21,16 +20,19 @@ public class SubmenuActivity extends SimplePagerActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        assert getIntent() != null;
-        Intent intent = getIntent();
-        ModuleId parentModuleId = (ModuleId) intent.getSerializableExtra(KEY_PARENT_MODULE);
-        setModule(ModuleSupplier.getInstance().findSubmenuModule(this, parentModuleId));
+        if (getIntent() == null || getIntent().getSerializableExtra(KEY_PARENT_MODULE) == null) {
+            setModule(ModuleSupplier.getInstance().getHomeScreenModule(this));
+        } else {
+            Intent intent = getIntent();
+            ModuleId parentModuleId = (ModuleId) intent.getSerializableExtra(KEY_PARENT_MODULE);
+            setModule(ModuleSupplier.getInstance().findSubmenuModule(this, parentModuleId));
+        }
 
     }
 
     @Override
     protected void adjustModules(ISubmenuModule parentModule, List<IModule> modules) {
-        if (!parentModule.equals(HomeScreenModule.getInstance())) {
+        if (!parentModule.equals(ModuleSupplier.getInstance().getHomeScreenModule(this))) {
             if (modules.size() > 0) {
                 if (!(modules.get(0) instanceof BackModule)) {
                     modules.add(0, new BackModule(this, parentModule));
@@ -63,6 +65,6 @@ public class SubmenuActivity extends SimplePagerActivity {
 
     @Override
     public int getMaxModules() {
-        return getModulesPerPageCount() * getPageCount(getModulesPerPageCount() - 1);
+        return getModulesPerPageCount() * getPageCount(getModulesPerPageCount());
     }
 }

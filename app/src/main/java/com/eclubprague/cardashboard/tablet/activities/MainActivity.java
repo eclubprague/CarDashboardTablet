@@ -16,7 +16,7 @@ public class MainActivity extends SimplePagerActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setSubmenuModule(Arrays.<IModule>asList(
+//        goToSubmenu(Arrays.<IModule>asList(
 //            new AbstractSimpleModule(null, null, null, null),
 //                new AbstractSimpleModule(null, null, null, null),
 //                new AbstractSimpleModule(null, null, null, null),

@@ -25,7 +25,7 @@ import java.util.List;
 
 abstract public class SimplePagerActivity extends FragmentActivity implements IModuleContext {
 
-    private static final String TAG = SimplePageFragment.class.getSimpleName();
+    private static final String TAG = SimplePagerActivity.class.getSimpleName();
 
     private ViewPager viewPager;
     private PagerAdapter pagerAdapter;
@@ -161,9 +161,18 @@ abstract public class SimplePagerActivity extends FragmentActivity implements IM
     }
 
     @Override
-    public void setSubmenuModule(ISubmenuModule parentModule) {
+    public void goToSubmenu(ISubmenuModule parentModule) {
         Intent intent = new Intent(this, SubmenuActivity.class);
         intent.putExtra(SubmenuActivity.KEY_PARENT_MODULE, parentModule.getId());
+        // DOES NOT WORK (problem with homescreen parent without a view, doesnt work anyway)
+//        String transitionName = getString(R.string.transition_card);
+//        Log.d(TAG, parentModule.toString());
+//        ActivityOptionsCompat options =
+//                ActivityOptionsCompat.makeSceneTransitionAnimation(this,
+//                        parentModule.getView(),   // The view which starts the transition
+//                        transitionName    // The transitionName of the view we’re transitioning to
+//                );
+//        ActivityCompat.startActivity(this, intent, options.toBundle());
         startActivity(intent);
     }
 
@@ -172,5 +181,10 @@ abstract public class SimplePagerActivity extends FragmentActivity implements IM
     @Override
     public void swapModules(IModule oldModule, IModule newModule, boolean animate) {
 
+    }
+
+    @Override
+    public void goBack(ISubmenuModule parentModule) {
+        finish();
     }
 }

@@ -2,7 +2,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.eclubprague.cardashboard.tablet.fragments.SimplePageFragment">
+    tools:context="com.eclubprague.cardashboard.tablet.fragments.SimplePageFragment"
+    android:transitionName="@string/transition_card">
 
     <GridView
         android:id="@+id/fragment_page_grid"

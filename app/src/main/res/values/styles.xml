@@ -3,6 +3,7 @@
 
     <style name="AppTheme" parent="android:Theme.Material">
         <item name="card_background">@color/card_background_dark</item>
+
     </style>
 
     <style name="Light" parent="android:Theme.Material.Light">

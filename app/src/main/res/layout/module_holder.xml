@@ -5,6 +5,7 @@
     android:layout_height="@dimen/card_size"
     style="@style/card_holder"
     android:background="?attr/card_background"
-    android:cacheColorHint="?card_background">
+    android:cacheColorHint="?card_background"
+    android:transitionName="@string/transition_card">
 
 </LinearLayout>
