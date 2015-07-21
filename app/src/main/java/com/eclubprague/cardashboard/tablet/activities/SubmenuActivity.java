@@ -6,8 +6,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.eclubprague.cardashboard.core.data.ModuleSupplier;
+import com.eclubprague.cardashboard.core.modules.base.IModule;
+import com.eclubprague.cardashboard.core.modules.base.ISubmenuModule;
 import com.eclubprague.cardashboard.core.modules.base.models.ModuleId;
+import com.eclubprague.cardashboard.core.modules.predefined.BackModule;
+import com.eclubprague.cardashboard.core.modules.predefined.HomeScreenModule;
 import com.eclubprague.cardashboard.tablet.R;
+
+import java.util.List;
 
 public class SubmenuActivity extends SimplePagerActivity {
     public static final String KEY_PARENT_MODULE = SubmenuActivity.class.getName() + ".KEY_PARENT_MODULE";
@@ -19,6 +25,18 @@ public class SubmenuActivity extends SimplePagerActivity {
         Intent intent = getIntent();
         ModuleId parentModuleId = (ModuleId) intent.getSerializableExtra(KEY_PARENT_MODULE);
         setModule(ModuleSupplier.getInstance().findSubmenuModule(this, parentModuleId));
+
+    }
+
+    @Override
+    protected void adjustModules(ISubmenuModule parentModule, List<IModule> modules) {
+        if (!parentModule.equals(HomeScreenModule.getInstance())) {
+            if (modules.size() > 0) {
+                if (!(modules.get(0) instanceof BackModule)) {
+                    modules.add(0, new BackModule(this, parentModule));
+                }
+            }
+        }
     }
 
     @Override
@@ -41,5 +59,10 @@ public class SubmenuActivity extends SimplePagerActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public int getMaxModules() {
+        return getModulesPerPageCount() * getPageCount(getModulesPerPageCount() - 1);
     }
 }

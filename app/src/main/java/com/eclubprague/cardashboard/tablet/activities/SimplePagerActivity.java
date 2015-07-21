@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
@@ -63,7 +63,9 @@ abstract public class SimplePagerActivity extends FragmentActivity implements IM
                 columnCount = tableSize.width;
                 rowCount = tableSize.height;
 
-                int maxModules = getPageCount() * getModulesPerPageCount();
+                adjustModules(parentModule, modules);
+
+                int maxModules = getMaxModules();
                 while (modules.size() < maxModules) {
                     addEmptyModule();
                 }
@@ -76,6 +78,8 @@ abstract public class SimplePagerActivity extends FragmentActivity implements IM
             }
         });
     }
+
+    protected abstract void adjustModules(ISubmenuModule parentModule, List<IModule> modules);
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -102,7 +106,7 @@ abstract public class SimplePagerActivity extends FragmentActivity implements IM
 
     private PagerAdapter createPagerAdapter() {
 
-        return new FragmentPagerAdapter(getSupportFragmentManager()) {
+        return new FragmentStatePagerAdapter(getSupportFragmentManager()) {
             @Override
             public Fragment getItem(int i) {
                 return getPageFragment(i);
@@ -110,7 +114,7 @@ abstract public class SimplePagerActivity extends FragmentActivity implements IM
 
             @Override
             public int getCount() {
-                return getPageCount();
+                return getPageCount(getModulesPerPageCount());
             }
         };
     }
@@ -127,11 +131,11 @@ abstract public class SimplePagerActivity extends FragmentActivity implements IM
         return getRowCount() * getColumnCount();
     }
 
-    private int getPageCount() {
+    public int getPageCount(int modulesPerPage) {
         if (modules == null) {
             return 0;
         } else {
-            return (int) Math.round(Math.ceil((double) modules.size() / getModulesPerPageCount())); // +1 always add at least one empty module
+            return (int) Math.round(Math.ceil((double) modules.size() / modulesPerPage));
         }
     }
 
@@ -156,11 +160,14 @@ abstract public class SimplePagerActivity extends FragmentActivity implements IM
         modules.add(new EmptyModule(this, parentModule, null, null));
     }
 
+    @Override
     public void setSubmenuModule(ISubmenuModule parentModule) {
         Intent intent = new Intent(this, SubmenuActivity.class);
         intent.putExtra(SubmenuActivity.KEY_PARENT_MODULE, parentModule.getId());
         startActivity(intent);
     }
+
+    abstract public int getMaxModules();
 
     @Override
     public void swapModules(IModule oldModule, IModule newModule, boolean animate) {

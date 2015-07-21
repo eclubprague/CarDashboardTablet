@@ -5,7 +5,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.eclubprague.cardashboard.core.data.ModuleSupplier;
+import com.eclubprague.cardashboard.core.modules.base.IModule;
+import com.eclubprague.cardashboard.core.modules.base.ISubmenuModule;
 import com.eclubprague.cardashboard.tablet.R;
+
+import java.util.List;
 
 public class MainActivity extends SimplePagerActivity {
 
@@ -19,6 +23,11 @@ public class MainActivity extends SimplePagerActivity {
 //                new AbstractSimpleModule(null, null, null, null)
 //        ));
         setModule(ModuleSupplier.getInstance().getHomeScreenModule(this));
+    }
+
+    @Override
+    protected void adjustModules(ISubmenuModule parentModule, List<IModule> modules) {
+        // no need to do anything
     }
 
     @Override
@@ -41,5 +50,10 @@ public class MainActivity extends SimplePagerActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public int getMaxModules() {
+        return getPageCount(getModulesPerPageCount()) * getModulesPerPageCount();
     }
 }
