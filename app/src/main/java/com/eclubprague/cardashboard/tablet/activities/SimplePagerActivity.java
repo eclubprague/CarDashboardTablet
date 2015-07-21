@@ -1,5 +1,6 @@
 package com.eclubprague.cardashboard.tablet.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -12,20 +13,27 @@ import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
 
 import com.eclubprague.cardashboard.core.modules.base.IModule;
+import com.eclubprague.cardashboard.core.modules.base.IModuleContext;
+import com.eclubprague.cardashboard.core.modules.base.ISubmenuModule;
+import com.eclubprague.cardashboard.core.modules.predefined.EmptyModule;
 import com.eclubprague.cardashboard.tablet.R;
 import com.eclubprague.cardashboard.tablet.fragments.SimplePageFragment;
 import com.eclubprague.cardashboard.tablet.utils.CardSizeUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
-abstract public class SimplePagerActivity extends FragmentActivity implements SimplePageFragment.OnPageFragmentInteractionListener {
+abstract public class SimplePagerActivity extends FragmentActivity implements IModuleContext {
+
+    private static final String TAG = SimplePageFragment.class.getSimpleName();
 
     private ViewPager viewPager;
     private PagerAdapter pagerAdapter;
 
-    private int rowCount;
-    private int columnCount;
+    private int rowCount = -1;
+    private int columnCount = -1;
     private List<IModule> modules;
+    private ISubmenuModule parentModule;
 
     private int page = 0;
 
@@ -34,8 +42,11 @@ abstract public class SimplePagerActivity extends FragmentActivity implements Si
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_simple_pager);
         viewPager = (ViewPager) findViewById(R.id.viewpager);
-        pagerAdapter = createPagerAdapter();
         // determine size
+    }
+
+    protected void initPager() {
+        pagerAdapter = createPagerAdapter();
         final RelativeLayout rootLayout = (RelativeLayout) findViewById(R.id.simplepager_root_layout);
         ViewTreeObserver observer = rootLayout.getViewTreeObserver();
         observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -52,12 +63,18 @@ abstract public class SimplePagerActivity extends FragmentActivity implements Si
                 columnCount = tableSize.width;
                 rowCount = tableSize.height;
 
+                int maxModules = getPageCount() * getModulesPerPageCount();
+                while (modules.size() < maxModules) {
+                    addEmptyModule();
+                }
+//                Log.d(TAG, "modules size = " + modules.size() + ", pageCount = " + getPageCount() + ", per page = " + getModulesPerPageCount());
+
+//                Log.d(TAG, "modules new size = " + modules.size());
+
                 viewPager.setAdapter(pagerAdapter);
                 viewPager.setCurrentItem(0);
             }
         });
-
-
     }
 
     @Override
@@ -114,7 +131,7 @@ abstract public class SimplePagerActivity extends FragmentActivity implements Si
         if (modules == null) {
             return 0;
         } else {
-            return (int) Math.round(Math.ceil((double) modules.size() / getModulesPerPageCount()));
+            return (int) Math.round(Math.ceil((double) modules.size() / getModulesPerPageCount())); // +1 always add at least one empty module
         }
     }
 
@@ -124,16 +141,29 @@ abstract public class SimplePagerActivity extends FragmentActivity implements Si
         }
         int start = page * getModulesPerPageCount();
         int end = (modules.size() < start + getModulesPerPageCount()) ? modules.size() : start + getModulesPerPageCount();
-        return SimplePageFragment.newInstance(modules.subList(start, end), rowCount, columnCount);
+        List<IModule> submodules = new ArrayList<>(modules.subList(start, end));
+        return SimplePageFragment.newInstance(submodules, rowCount, columnCount);
     }
 
-    public void setModules(List<IModule> modules) {
-        this.modules = modules;
-        if (pagerAdapter != null) {
-            pagerAdapter.notifyDataSetChanged();
-        }
-        if (viewPager != null) {
-            viewPager.setCurrentItem(0);
-        }
+    protected void setModule(ISubmenuModule parentModule) {
+        this.parentModule = parentModule;
+        this.modules = this.parentModule.getSubmodules(this);
+        addEmptyModule();
+        initPager();
+    }
+
+    private void addEmptyModule() {
+        modules.add(new EmptyModule(this, parentModule, null, null));
+    }
+
+    public void setSubmenuModule(ISubmenuModule parentModule) {
+        Intent intent = new Intent(this, SubmenuActivity.class);
+        intent.putExtra(SubmenuActivity.KEY_PARENT_MODULE, parentModule.getId());
+        startActivity(intent);
+    }
+
+    @Override
+    public void swapModules(IModule oldModule, IModule newModule, boolean animate) {
+
     }
 }

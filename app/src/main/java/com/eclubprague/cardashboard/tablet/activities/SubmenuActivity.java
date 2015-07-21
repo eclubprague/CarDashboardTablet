@@ -1,30 +1,30 @@
 package com.eclubprague.cardashboard.tablet.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.eclubprague.cardashboard.core.data.ModuleSupplier;
+import com.eclubprague.cardashboard.core.modules.base.models.ModuleId;
 import com.eclubprague.cardashboard.tablet.R;
 
-public class MainActivity extends SimplePagerActivity {
+public class SubmenuActivity extends SimplePagerActivity {
+    public static final String KEY_PARENT_MODULE = SubmenuActivity.class.getName() + ".KEY_PARENT_MODULE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setSubmenuModule(Arrays.<IModule>asList(
-//            new AbstractSimpleModule(null, null, null, null),
-//                new AbstractSimpleModule(null, null, null, null),
-//                new AbstractSimpleModule(null, null, null, null),
-//                new AbstractSimpleModule(null, null, null, null)
-//        ));
-        setModule(ModuleSupplier.getInstance().getHomeScreenModule(this));
+        assert getIntent() != null;
+        Intent intent = getIntent();
+        ModuleId parentModuleId = (ModuleId) intent.getSerializableExtra(KEY_PARENT_MODULE);
+        setModule(ModuleSupplier.getInstance().findSubmenuModule(this, parentModuleId));
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_submenu, menu);
         return true;
     }
 

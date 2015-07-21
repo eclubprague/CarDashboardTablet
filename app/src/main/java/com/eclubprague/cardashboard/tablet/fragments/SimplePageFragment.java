@@ -10,6 +10,7 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 
 import com.eclubprague.cardashboard.core.modules.base.IModule;
+import com.eclubprague.cardashboard.core.modules.base.IModuleContext;
 import com.eclubprague.cardashboard.tablet.R;
 import com.eclubprague.cardashboard.tablet.utils.CardSizeUtils;
 
@@ -18,7 +19,7 @@ import java.util.List;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link OnPageFragmentInteractionListener} interface
+ * {@link IModuleContext} interface
  * to handle interaction events.
  * Use the {@link SimplePageFragment#newInstance} factory method to
  * create an instance of this fragment.
@@ -36,7 +37,7 @@ public class SimplePageFragment extends Fragment {
 
     private CardSizeUtils.Size optimalCardSize;
 
-    private OnPageFragmentInteractionListener mListener;
+    private IModuleContext moduleContext;
 
     /**
      * Use this factory method to create a new instance of
@@ -88,7 +89,7 @@ public class SimplePageFragment extends Fragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mListener = (OnPageFragmentInteractionListener) activity;
+            moduleContext = (IModuleContext) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement OnPageFragmentInteractionListener");
@@ -98,7 +99,7 @@ public class SimplePageFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+        moduleContext = null;
     }
 
     private void setModules(List<IModule> modules) {
@@ -118,15 +119,6 @@ public class SimplePageFragment extends Fragment {
             optimalCardSize = CardSizeUtils.getOptimalCardSize(getActivity(), availableHeight, availableWidth);
         }
         return optimalCardSize;
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     */
-    public interface OnPageFragmentInteractionListener {
     }
 
     private class ModuleAdapter extends BaseAdapter {
@@ -149,10 +141,8 @@ public class SimplePageFragment extends Fragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             View view;
-            if (position >= modules.size()) {
-                return null;
-            }
             if (convertView == null) {
+//                Log.d(TAG, modules.size() + " <= " + position);
                 IModule module = modules.get(position);
                 view = module.createViewWithHolder(getActivity(), R.layout.module_holder, parent);
                 //view = ViewUtils.setSize(view, getOptimalCardSize().width, getOptimalCardSize().height);
