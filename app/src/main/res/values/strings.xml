@@ -5,6 +5,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_main">MainActivity</string>
-    <string name="title_activity_submenu">SubmenuActivity</string>
+    <string name="title_activity_module">SubmenuActivity</string>
     <string name="transition_card">transition_card</string>
 </resources>

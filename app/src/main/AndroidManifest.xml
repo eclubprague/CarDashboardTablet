@@ -8,8 +8,8 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".activities.SubmenuActivity"
-            android:label="@string/title_activity_submenu">
+            android:name=".activities.ModuleActivity"
+            android:label="@string/title_activity_module">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

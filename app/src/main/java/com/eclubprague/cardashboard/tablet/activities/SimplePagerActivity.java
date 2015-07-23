@@ -14,7 +14,7 @@ import android.widget.RelativeLayout;
 
 import com.eclubprague.cardashboard.core.modules.base.IModule;
 import com.eclubprague.cardashboard.core.modules.base.IModuleContext;
-import com.eclubprague.cardashboard.core.modules.base.ISubmenuModule;
+import com.eclubprague.cardashboard.core.modules.base.IParentModule;
 import com.eclubprague.cardashboard.core.modules.predefined.EmptyModule;
 import com.eclubprague.cardashboard.tablet.R;
 import com.eclubprague.cardashboard.tablet.fragments.SimplePageFragment;
@@ -33,7 +33,7 @@ abstract public class SimplePagerActivity extends FragmentActivity implements IM
     private int rowCount = -1;
     private int columnCount = -1;
     private List<IModule> modules;
-    private ISubmenuModule parentModule;
+    private IParentModule parentModule;
 
     private int page = 0;
 
@@ -79,7 +79,7 @@ abstract public class SimplePagerActivity extends FragmentActivity implements IM
         });
     }
 
-    protected abstract void adjustModules(ISubmenuModule parentModule, List<IModule> modules);
+    protected abstract void adjustModules(IParentModule parentModule, List<IModule> modules);
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -149,7 +149,9 @@ abstract public class SimplePagerActivity extends FragmentActivity implements IM
         return SimplePageFragment.newInstance(submodules, rowCount, columnCount);
     }
 
-    protected void setModule(ISubmenuModule parentModule) {
+    protected void setModule(IParentModule parentModule) {
+        getActionBar().setTitle(parentModule.getTitle().getString(this));
+        getActionBar().setIcon(parentModule.getIcon().getIcon(this));
         this.parentModule = parentModule;
         this.modules = this.parentModule.getSubmodules(this);
         addEmptyModule();
@@ -161,9 +163,9 @@ abstract public class SimplePagerActivity extends FragmentActivity implements IM
     }
 
     @Override
-    public void goToSubmenu(ISubmenuModule parentModule) {
-        Intent intent = new Intent(this, SubmenuActivity.class);
-        intent.putExtra(SubmenuActivity.KEY_PARENT_MODULE, parentModule.getId());
+    public void goToSubmenu(IParentModule parentModule) {
+        Intent intent = new Intent(this, ModuleActivity.class);
+        intent.putExtra(ModuleActivity.KEY_PARENT_MODULE, parentModule.getId());
         // DOES NOT WORK (problem with homescreen parent without a view, doesnt work anyway)
 //        String transitionName = getString(R.string.transition_card);
 //        Log.d(TAG, parentModule.toString());
@@ -184,7 +186,7 @@ abstract public class SimplePagerActivity extends FragmentActivity implements IM
     }
 
     @Override
-    public void goBack(ISubmenuModule parentModule) {
+    public void goBack(IParentModule parentModule) {
         finish();
     }
 }

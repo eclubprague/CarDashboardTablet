@@ -7,31 +7,32 @@ import android.view.MenuItem;
 
 import com.eclubprague.cardashboard.core.data.ModuleSupplier;
 import com.eclubprague.cardashboard.core.modules.base.IModule;
-import com.eclubprague.cardashboard.core.modules.base.ISubmenuModule;
+import com.eclubprague.cardashboard.core.modules.base.IParentModule;
 import com.eclubprague.cardashboard.core.modules.base.models.ModuleId;
 import com.eclubprague.cardashboard.core.modules.predefined.BackModule;
 import com.eclubprague.cardashboard.tablet.R;
 
 import java.util.List;
 
-public class SubmenuActivity extends SimplePagerActivity {
-    public static final String KEY_PARENT_MODULE = SubmenuActivity.class.getName() + ".KEY_PARENT_MODULE";
+public class ModuleActivity extends SimplePagerActivity {
+    public static final String KEY_PARENT_MODULE = ModuleActivity.class.getName() + ".KEY_PARENT_MODULE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        IParentModule module;
         if (getIntent() == null || getIntent().getSerializableExtra(KEY_PARENT_MODULE) == null) {
-            setModule(ModuleSupplier.getInstance().getHomeScreenModule(this));
+            module = ModuleSupplier.getInstance().getHomeScreenModule(this);
         } else {
             Intent intent = getIntent();
             ModuleId parentModuleId = (ModuleId) intent.getSerializableExtra(KEY_PARENT_MODULE);
-            setModule(ModuleSupplier.getInstance().findSubmenuModule(this, parentModuleId));
+            module = ModuleSupplier.getInstance().findSubmenuModule(this, parentModuleId);
         }
-
+        setModule(module);
     }
 
     @Override
-    protected void adjustModules(ISubmenuModule parentModule, List<IModule> modules) {
+    protected void adjustModules(IParentModule parentModule, List<IModule> modules) {
         if (!parentModule.equals(ModuleSupplier.getInstance().getHomeScreenModule(this))) {
             if (modules.size() > 0) {
                 if (!(modules.get(0) instanceof BackModule)) {
@@ -44,7 +45,7 @@ public class SubmenuActivity extends SimplePagerActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_submenu, menu);
+        getMenuInflater().inflate(R.menu.menu_module, menu);
         return true;
     }
 

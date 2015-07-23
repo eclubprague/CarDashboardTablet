@@ -3,9 +3,6 @@
     android:orientation="vertical"
     android:layout_width="@dimen/card_size"
     android:layout_height="@dimen/card_size"
-    style="@style/card_holder"
-    android:background="?attr/card_background"
-    android:cacheColorHint="?card_background"
-    android:transitionName="@string/transition_card">
+    style="@style/card_holder">
 
 </LinearLayout>

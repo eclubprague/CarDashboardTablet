@@ -144,7 +144,7 @@ public class SimplePageFragment extends Fragment {
             if (convertView == null) {
 //                Log.d(TAG, modules.size() + " <= " + position);
                 IModule module = modules.get(position);
-                view = module.createViewWithHolder(getActivity(), R.layout.module_holder, parent);
+                view = module.createViewWithHolder(getActivity(), R.layout.module_holder, parent).holder;
                 //view = ViewUtils.setSize(view, getOptimalCardSize().width, getOptimalCardSize().height);
             } else {
                 view = convertView;
