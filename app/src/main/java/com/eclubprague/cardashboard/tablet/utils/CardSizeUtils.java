@@ -20,11 +20,12 @@ public class CardSizeUtils {
      */
     public static Size getTableSize(Context context, int availableHeight, int availableWidth){
         int margin = context.getResources().getDimensionPixelSize(R.dimen.card_margin);
+        int borderMargin = context.getResources().getDimensionPixelSize(R.dimen.card_margin_side);
         int height = context.getResources().getDimensionPixelSize(R.dimen.card_size);
         int width = context.getResources().getDimensionPixelSize(R.dimen.card_size);
 
-        availableHeight -= margin; // top spacing
-        availableWidth -= margin; // left spacing
+        availableHeight -= margin + 2 * borderMargin; // top spacing + top and bottom outer margin
+        availableWidth -= margin + 2 * borderMargin; // left spacing + left and right outer margin
         int minHeightRequiredPerCard = height + margin;
         int minWidthRequiredPerCard = width + margin;
         return new Size(availableHeight / minHeightRequiredPerCard,// rows
