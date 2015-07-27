@@ -1,13 +1,14 @@
 package com.eclubprague.cardashboard.tablet.fragments;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
+import android.widget.ViewSwitcher;
 
 import com.eclubprague.cardashboard.core.modules.base.IModule;
 import com.eclubprague.cardashboard.core.modules.base.IModuleContext;
@@ -144,7 +145,9 @@ public class SimplePageFragment extends Fragment {
             if (convertView == null) {
 //                Log.d(TAG, modules.size() + " <= " + position);
                 IModule module = modules.get(position);
-                view = module.createViewWithHolder(getActivity(), R.layout.module_holder, parent).holder;
+                ViewSwitcher viewHolder = (ViewSwitcher) module.createViewWithHolder(getActivity(), R.layout.module_holder, parent).holder;
+                viewHolder.addView(module.createQuickMenuView(getActivity(), viewHolder));
+                view = viewHolder;
                 //view = ViewUtils.setSize(view, getOptimalCardSize().width, getOptimalCardSize().height);
             } else {
                 view = convertView;

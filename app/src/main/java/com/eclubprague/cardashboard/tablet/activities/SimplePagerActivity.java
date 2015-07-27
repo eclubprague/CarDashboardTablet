@@ -1,16 +1,18 @@
 package com.eclubprague.cardashboard.tablet.activities;
 
+import android.app.Activity;
+import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v13.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
+import android.widget.ViewSwitcher;
 
 import com.eclubprague.cardashboard.core.modules.base.IModule;
 import com.eclubprague.cardashboard.core.modules.base.IModuleContext;
@@ -23,7 +25,7 @@ import com.eclubprague.cardashboard.tablet.utils.CardSizeUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-abstract public class SimplePagerActivity extends FragmentActivity implements IModuleContext {
+abstract public class SimplePagerActivity extends Activity implements IModuleContext {
 
     private static final String TAG = SimplePagerActivity.class.getSimpleName();
 
@@ -106,7 +108,7 @@ abstract public class SimplePagerActivity extends FragmentActivity implements IM
 
     private PagerAdapter createPagerAdapter() {
 
-        return new FragmentStatePagerAdapter(getSupportFragmentManager()) {
+        return new FragmentStatePagerAdapter(getFragmentManager()) {
             @Override
             public Fragment getItem(int i) {
                 return getPageFragment(i);
@@ -163,7 +165,7 @@ abstract public class SimplePagerActivity extends FragmentActivity implements IM
     }
 
     @Override
-    public void goToSubmenu(IParentModule parentModule) {
+    public void goToSubmodules(IParentModule parentModule) {
         Intent intent = new Intent(this, ModuleActivity.class);
         intent.putExtra(ModuleActivity.KEY_PARENT_MODULE, parentModule.getId());
         // DOES NOT WORK (problem with homescreen parent without a view, doesnt work anyway)
@@ -178,6 +180,27 @@ abstract public class SimplePagerActivity extends FragmentActivity implements IM
         startActivity(intent);
     }
 
+    @Override
+    public void toggleQuickMenu(IModule module, boolean activate) {
+        if (activate) {
+            ViewSwitcher holder = (ViewSwitcher) module.loadHolder();
+            holder.showNext();
+            Log.d(TAG, "Toggling quick menu: activating, content: " + holder.getChildCount());
+            for (int i = 0; i < holder.getChildCount(); i++) {
+                Log.d(TAG, "child at " + i + ": " + holder.getChildAt(i));
+            }
+        } else {
+            ViewSwitcher holder = (ViewSwitcher) module.loadHolder();
+            holder.showPrevious();
+            Log.d(TAG, "Toggling quick menu: deactivating, content: " + holder.getChildCount());
+        }
+    }
+
+    @Override
+    public void launchIntent(Intent intent) {
+        startActivity(intent);
+    }
+
     abstract public int getMaxModules();
 
     @Override
@@ -186,7 +209,7 @@ abstract public class SimplePagerActivity extends FragmentActivity implements IM
     }
 
     @Override
-    public void goBack(IParentModule parentModule) {
+    public void goBackFromSubmodules(IParentModule parentModule) {
         finish();
     }
 }
