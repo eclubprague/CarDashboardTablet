@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * Created by Michael on 30. 7. 2015.
  * <p/>
- * Adapter for module fragments.
+ * Adapter for module fragments..
  */
 public class ModuleFragmentAdapter extends FragmentStatePagerAdapter {
     public static final String TAG = ModuleFragmentAdapter.class.getSimpleName();
