@@ -1,10 +1,12 @@
 package com.eclubprague.cardashboard.tablet.activities;
 
 import android.app.Activity;
-import android.app.Fragment;
+import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v13.app.FragmentStatePagerAdapter;
+import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -17,38 +19,61 @@ import android.widget.ViewSwitcher;
 import com.eclubprague.cardashboard.core.modules.base.IModule;
 import com.eclubprague.cardashboard.core.modules.base.IModuleContext;
 import com.eclubprague.cardashboard.core.modules.base.IParentModule;
+import com.eclubprague.cardashboard.core.modules.base.models.resources.StringResource;
 import com.eclubprague.cardashboard.core.modules.predefined.EmptyModule;
 import com.eclubprague.cardashboard.tablet.R;
-import com.eclubprague.cardashboard.tablet.fragments.SimplePageFragment;
+import com.eclubprague.cardashboard.tablet.adapters.ModuleFragmentAdapter;
+import com.eclubprague.cardashboard.tablet.model.modules.IModuleContextTabletActivity;
 import com.eclubprague.cardashboard.tablet.utils.CardSizeUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
-abstract public class SimplePagerActivity extends Activity implements IModuleContext {
+abstract public class SimplePagerActivity extends Activity implements IModuleContextTabletActivity {
 
     private static final String TAG = SimplePagerActivity.class.getSimpleName();
+    private static final String KEY_PAGE = "keyPage";
+    private static final int DEFAULT_INT = -1;
 
     private ViewPager viewPager;
     private PagerAdapter pagerAdapter;
 
-    private int rowCount = -1;
-    private int columnCount = -1;
     private List<IModule> modules;
     private IParentModule parentModule;
 
-    private int page = 0;
+    private int page = DEFAULT_INT;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_simple_pager);
+//        viewPager = new ViewPager(this);
+//        ViewGroup root = (ViewGroup) findViewById(R.id.simplepager_root_layout);
+//        viewPager.setId(R.id.viewpager);
+//        root.addView(viewPager);
         viewPager = (ViewPager) findViewById(R.id.viewpager);
+//        Log.d(TAG, "recreating activity");
+        if (savedInstanceState != null) {
+            page = savedInstanceState.getInt(KEY_PAGE, DEFAULT_INT);
+        }
         // determine size
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        goToSubmodules(getParentModule());
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putInt(KEY_PAGE, viewPager.getCurrentItem());
+        super.onSaveInstanceState(outState);
+    }
+
     protected void initPager() {
-        pagerAdapter = createPagerAdapter();
+        final IModuleContext thisModuleContext = this;
+        viewPager.setAdapter(null);
+//        Log.d(TAG, "recreating pager adapter");
         final RelativeLayout rootLayout = (RelativeLayout) findViewById(R.id.simplepager_root_layout);
         ViewTreeObserver observer = rootLayout.getViewTreeObserver();
         observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -62,21 +87,22 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
 
                 CardSizeUtils.Size tableSize = CardSizeUtils.getTableSize(getApplicationContext(), availableHeight, availableWidth);
 
-                columnCount = tableSize.width;
-                rowCount = tableSize.height;
+                int columnCount = tableSize.width;
+                int rowCount = tableSize.height;
 
                 adjustModules(parentModule, modules);
-
-                int maxModules = getMaxModules();
-                while (modules.size() < maxModules) {
-                    addEmptyModule();
-                }
 //                Log.d(TAG, "modules size = " + modules.size() + ", pageCount = " + getPageCount() + ", per page = " + getModulesPerPageCount());
 
 //                Log.d(TAG, "modules new size = " + modules.size());
 
+                pagerAdapter = new ModuleFragmentAdapter(getFragmentManager(), rowCount, columnCount, modules, thisModuleContext, parentModule);
+                Log.d(TAG, "recreating activity layout");
                 viewPager.setAdapter(pagerAdapter);
-                viewPager.setCurrentItem(0);
+                if (page != DEFAULT_INT) {
+                    viewPager.setCurrentItem(page);
+                } else {
+                    viewPager.setCurrentItem(0);
+                }
             }
         });
     }
@@ -106,49 +132,8 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
     }
 
 
-    private PagerAdapter createPagerAdapter() {
-
-        return new FragmentStatePagerAdapter(getFragmentManager()) {
-            @Override
-            public Fragment getItem(int i) {
-                return getPageFragment(i);
-            }
-
-            @Override
-            public int getCount() {
-                return getPageCount(getModulesPerPageCount());
-            }
-        };
-    }
-
-    protected int getRowCount() {
-        return rowCount;
-    }
-
-    protected int getColumnCount() {
-        return columnCount;
-    }
-
-    protected int getModulesPerPageCount() {
-        return getRowCount() * getColumnCount();
-    }
-
-    public int getPageCount(int modulesPerPage) {
-        if (modules == null) {
-            return 0;
-        } else {
-            return (int) Math.round(Math.ceil((double) modules.size() / modulesPerPage));
-        }
-    }
-
-    private Fragment getPageFragment(int page) {
-        if (modules == null) {
-            return null;
-        }
-        int start = page * getModulesPerPageCount();
-        int end = (modules.size() < start + getModulesPerPageCount()) ? modules.size() : start + getModulesPerPageCount();
-        List<IModule> submodules = new ArrayList<>(modules.subList(start, end));
-        return SimplePageFragment.newInstance(submodules, rowCount, columnCount);
+    protected IParentModule getParentModule() {
+        return parentModule;
     }
 
     protected void setModule(IParentModule parentModule) {
@@ -156,6 +141,7 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
         getActionBar().setIcon(parentModule.getIcon().getIcon(this));
         this.parentModule = parentModule;
         this.modules = this.parentModule.getSubmodules(this);
+        parentModule.removeEmptyModules();
         addEmptyModule();
         initPager();
     }
@@ -197,11 +183,21 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
     }
 
     @Override
-    public void launchIntent(Intent intent) {
-        startActivity(intent);
+    public void turnQuickMenusOff() {
+        for (IModule module : modules) {
+            module.onCancel(this);
+        }
     }
 
-    abstract public int getMaxModules();
+    @Override
+    public void launchIntent(Intent intent, StringResource errorMessage) {
+        try {
+            startActivity(intent);
+        } catch (ActivityNotFoundException ex) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(errorMessage.getString(this)).create().show();
+        }
+    }
 
     @Override
     public void swapModules(IModule oldModule, IModule newModule, boolean animate) {

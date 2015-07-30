@@ -21,14 +21,24 @@ public class ModuleActivity extends SimplePagerActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         IParentModule module;
-        if (getIntent() == null || getIntent().getSerializableExtra(KEY_PARENT_MODULE) == null) {
-            module = ModuleSupplier.getInstance().getHomeScreenModule(this);
-        } else {
+        if (savedInstanceState != null && savedInstanceState.getSerializable(KEY_PARENT_MODULE) != null) {
+            ModuleId parentModuleId = (ModuleId) savedInstanceState.getSerializable(KEY_PARENT_MODULE);
+            module = ModuleSupplier.getInstance().findSubmenuModule(this, parentModuleId);
+        } else if (getIntent() != null && getIntent().getSerializableExtra(KEY_PARENT_MODULE) != null) {
             Intent intent = getIntent();
             ModuleId parentModuleId = (ModuleId) intent.getSerializableExtra(KEY_PARENT_MODULE);
             module = ModuleSupplier.getInstance().findSubmenuModule(this, parentModuleId);
+        } else {
+            module = ModuleSupplier.getInstance().getHomeScreenModule(this);
         }
+        module.removeEmptyModules();
         setModule(module);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putSerializable(KEY_PARENT_MODULE, getParentModule().getId());
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -64,8 +74,4 @@ public class ModuleActivity extends SimplePagerActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public int getMaxModules() {
-        return getModulesPerPageCount() * getPageCount(getModulesPerPageCount());
-    }
 }

@@ -4,7 +4,7 @@
     android:layout_width="@dimen/card_size"
     android:layout_height="@dimen/card_size"
     style="@style/card_holder"
-    android:inAnimation="@android:anim/slide_in_left"
-    android:outAnimation="@android:anim/slide_out_right">
+    android:inAnimation="@android:anim/fade_in"
+    android:outAnimation="@android:anim/fade_out">
 
 </ViewSwitcher>

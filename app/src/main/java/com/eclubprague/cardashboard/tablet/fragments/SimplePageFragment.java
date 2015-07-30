@@ -3,6 +3,7 @@ package com.eclubprague.cardashboard.tablet.fragments;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import android.widget.ViewSwitcher;
 import com.eclubprague.cardashboard.core.modules.base.IModule;
 import com.eclubprague.cardashboard.core.modules.base.IModuleContext;
 import com.eclubprague.cardashboard.tablet.R;
+import com.eclubprague.cardashboard.tablet.model.modules.IModuleContextTabletActivity;
 import com.eclubprague.cardashboard.tablet.utils.CardSizeUtils;
 
 import java.util.List;
@@ -26,6 +28,9 @@ import java.util.List;
  * create an instance of this fragment.
  */
 public class SimplePageFragment extends Fragment {
+    public static final String KEY_MODULE_ID = "moduleId";
+    public static final String KEY_ROW_COUNT = "rowCount";
+    public static final String KEY_COLUMN_COUNT = "columnCount";
 
     private static final String TAG = SimplePageFragment.class.getSimpleName();
 
@@ -38,7 +43,7 @@ public class SimplePageFragment extends Fragment {
 
     private CardSizeUtils.Size optimalCardSize;
 
-    private IModuleContext moduleContext;
+    private IModuleContextTabletActivity moduleContext;
 
     /**
      * Use this factory method to create a new instance of
@@ -47,6 +52,7 @@ public class SimplePageFragment extends Fragment {
      * @return A new instance of fragment SimplePageFragment.
      */
     public static SimplePageFragment newInstance(List<IModule> modules, int rowCount, int columnCount) {
+        Log.d(TAG, "recreating fragment: newInstance");
         SimplePageFragment fragment = new SimplePageFragment();
         fragment.setModules(modules);
         fragment.setRowCount(rowCount);
@@ -61,11 +67,13 @@ public class SimplePageFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "recreating fragment");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        //Log.d(TAG, "onCreateView, modules: " + modules.size());
         View view = inflater.inflate(R.layout.fragment_simple_page, container, false);
 //        TextView textView = (TextView) view.findViewById(R.id.textview);
 //        StringBuilder sb = new StringBuilder();
@@ -90,7 +98,7 @@ public class SimplePageFragment extends Fragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            moduleContext = (IModuleContext) activity;
+            moduleContext = (IModuleContextTabletActivity) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement OnPageFragmentInteractionListener");
@@ -103,15 +111,15 @@ public class SimplePageFragment extends Fragment {
         moduleContext = null;
     }
 
-    private void setModules(List<IModule> modules) {
+    public void setModules(List<IModule> modules) {
         this.modules = modules;
     }
 
-    private void setRowCount(int rowCount) {
+    public void setRowCount(int rowCount) {
         this.rowCount = rowCount;
     }
 
-    private void setColumnCount(int columnCount) {
+    public void setColumnCount(int columnCount) {
         this.columnCount = columnCount;
     }
 
@@ -148,6 +156,12 @@ public class SimplePageFragment extends Fragment {
                 ViewSwitcher viewHolder = (ViewSwitcher) module.createViewWithHolder(getActivity(), R.layout.module_holder, parent).holder;
                 viewHolder.addView(module.createQuickMenuView(getActivity(), viewHolder));
                 view = viewHolder;
+                view.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        moduleContext.turnQuickMenusOff();
+                    }
+                });
                 //view = ViewUtils.setSize(view, getOptimalCardSize().width, getOptimalCardSize().height);
             } else {
                 view = convertView;

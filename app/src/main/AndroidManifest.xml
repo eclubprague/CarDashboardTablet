@@ -9,12 +9,14 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".activities.ModuleActivity"
+            android:configChanges="orientation|keyboard|screenSize"
             android:label="@string/title_activity_module">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+
         </activity>
     </application>
 
