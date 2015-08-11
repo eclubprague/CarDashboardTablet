@@ -31,8 +31,8 @@ import java.util.List;
 abstract public class SimplePagerActivity extends Activity implements IModuleContextTabletActivity {
 
     private static final String TAG = SimplePagerActivity.class.getSimpleName();
-    private static final String KEY_PAGE = "keyPage";
-    private static final int DEFAULT_INT = -1;
+    private static final String KEY_PAGE = SimplePagerActivity.class.getName() + ".keyPage";
+    private static final int DEFAULT_PAGE = 0;
 
     private ViewPager viewPager;
     private PagerAdapter pagerAdapter;
@@ -40,7 +40,7 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
     private List<IModule> modules;
     private IParentModule parentModule;
 
-    private int page = DEFAULT_INT;
+    private int page = DEFAULT_PAGE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +53,12 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
         viewPager = (ViewPager) findViewById(R.id.viewpager);
 //        Log.d(TAG, "recreating activity");
         if (savedInstanceState != null) {
-            page = savedInstanceState.getInt(KEY_PAGE, DEFAULT_INT);
+            page = savedInstanceState.getInt(KEY_PAGE, DEFAULT_PAGE);
+        } else if (getIntent() != null) {
+            Intent intent = getIntent();
+            page = intent.getIntExtra(KEY_PAGE, DEFAULT_PAGE);
+        } else {
+            page = DEFAULT_PAGE;
         }
         // determine size
     }
@@ -61,7 +66,10 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        goToSubmodules(getParentModule());
+        Intent intent = new Intent(this, ModuleActivity.class);
+        intent.putExtra(ModuleActivity.KEY_PARENT_MODULE, parentModule.getId());
+        intent.putExtra(KEY_PAGE, viewPager.getCurrentItem());
+        startActivity(intent);
     }
 
     @Override
@@ -98,11 +106,7 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
                 pagerAdapter = new ModuleFragmentAdapter(getFragmentManager(), rowCount, columnCount, modules, thisModuleContext, parentModule);
                 Log.d(TAG, "recreating activity layout");
                 viewPager.setAdapter(pagerAdapter);
-                if (page != DEFAULT_INT) {
-                    viewPager.setCurrentItem(page);
-                } else {
-                    viewPager.setCurrentItem(0);
-                }
+                viewPager.setCurrentItem(page);
             }
         });
     }
@@ -141,7 +145,7 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
         getActionBar().setIcon(parentModule.getIcon().getIcon(this));
         this.parentModule = parentModule;
         this.modules = this.parentModule.getSubmodules(this);
-        parentModule.removeEmptyModules();
+//        parentModule.removeEmptyModules();
         addEmptyModule();
         initPager();
     }
