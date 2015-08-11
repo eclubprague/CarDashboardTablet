@@ -73,5 +73,4 @@ public class ModuleActivity extends SimplePagerActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
 }

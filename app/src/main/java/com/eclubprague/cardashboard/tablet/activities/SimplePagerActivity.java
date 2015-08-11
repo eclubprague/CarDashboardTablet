@@ -3,6 +3,7 @@ package com.eclubprague.cardashboard.tablet.activities;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -211,5 +212,10 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
     @Override
     public void goBackFromSubmodules(IParentModule parentModule) {
         finish();
+    }
+
+    @Override
+    public Context getContext() {
+        return this;
     }
 }
