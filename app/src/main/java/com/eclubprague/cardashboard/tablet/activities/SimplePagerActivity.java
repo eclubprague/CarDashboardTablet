@@ -17,16 +17,20 @@ import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
 import android.widget.ViewSwitcher;
 
+import com.eclubprague.cardashboard.core.modules.base.IActivityStateChangeListener;
 import com.eclubprague.cardashboard.core.modules.base.IModule;
 import com.eclubprague.cardashboard.core.modules.base.IModuleContext;
 import com.eclubprague.cardashboard.core.modules.base.IParentModule;
+import com.eclubprague.cardashboard.core.modules.base.ModuleEvent;
 import com.eclubprague.cardashboard.core.modules.base.models.resources.StringResource;
+import com.eclubprague.cardashboard.core.modules.custom.ClockModule;
 import com.eclubprague.cardashboard.core.modules.predefined.EmptyModule;
 import com.eclubprague.cardashboard.tablet.R;
 import com.eclubprague.cardashboard.tablet.adapters.ModuleFragmentAdapter;
 import com.eclubprague.cardashboard.tablet.model.modules.IModuleContextTabletActivity;
 import com.eclubprague.cardashboard.tablet.utils.CardSizeUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 abstract public class SimplePagerActivity extends Activity implements IModuleContextTabletActivity {
@@ -38,6 +42,7 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
     private ViewPager viewPager;
     private PagerAdapter pagerAdapter;
 
+    private List<IActivityStateChangeListener> stateChangeListeners = new ArrayList<>();
     private List<IModule> modules;
     private IParentModule parentModule;
 
@@ -67,10 +72,7 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        Intent intent = new Intent(this, ModuleActivity.class);
-        intent.putExtra(ModuleActivity.KEY_PARENT_MODULE, parentModule.getId());
-        intent.putExtra(KEY_PAGE, viewPager.getCurrentItem());
-        startActivity(intent);
+        restart();
     }
 
     @Override
@@ -145,14 +147,10 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
         getActionBar().setTitle(parentModule.getTitle().getString(this));
         getActionBar().setIcon(parentModule.getIcon().getIcon(this));
         this.parentModule = parentModule;
+        this.parentModule.removeTailEmptyModules();
         this.modules = this.parentModule.getSubmodules(this);
-//        parentModule.removeEmptyModules();
-        addEmptyModule();
+//        parentModule.removeTailEmptyModules();
         initPager();
-    }
-
-    private void addEmptyModule() {
-        modules.add(new EmptyModule(this, parentModule, null, null));
     }
 
     @Override
@@ -174,14 +172,14 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
     @Override
     public void toggleQuickMenu(IModule module, boolean activate) {
         if (activate) {
-            ViewSwitcher holder = (ViewSwitcher) module.loadHolder();
+            ViewSwitcher holder = (ViewSwitcher) module.getHolder();
             holder.showNext();
             Log.d(TAG, "Toggling quick menu: activating, content: " + holder.getChildCount());
             for (int i = 0; i < holder.getChildCount(); i++) {
                 Log.d(TAG, "child at " + i + ": " + holder.getChildAt(i));
             }
         } else {
-            ViewSwitcher holder = (ViewSwitcher) module.loadHolder();
+            ViewSwitcher holder = (ViewSwitcher) module.getHolder();
             holder.showPrevious();
             Log.d(TAG, "Toggling quick menu: deactivating, content: " + holder.getChildCount());
         }
@@ -217,5 +215,45 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
     @Override
     public Context getContext() {
         return this;
+    }
+
+    @Override
+    public void addListener(IActivityStateChangeListener listener) {
+        stateChangeListeners.add(listener);
+    }
+
+    @Override
+    public void onModuleEvent(IModule module, ModuleEvent event) {
+        switch (event) {
+            case CANCEL:
+                toggleQuickMenu(module, false);
+                break;
+            case DELETE:
+//                for(IModule m : modules){
+//                    Log.d(TAG, "module: " + m.getId() + ", title = " + m.getTitle().getString(this));
+//                }
+//                Log.d(TAG, "removing module {" + module.getTitle().getString(this) + "}: " + module.toString());
+                modules.set(modules.indexOf(module), new EmptyModule(this, parentModule));
+                restart();
+                break;
+            case MOVE:
+//                View.DragShadowBuilder myShadow = new View.DragShadowBuilder(module.getView());
+//                module.getHolder().startDrag(null, myShadow, null, 0);
+                toggleQuickMenu(module, false);
+                break;
+            case ADD:
+                modules.set(modules.indexOf(module), new ClockModule(this, parentModule));
+                restart();
+                break;
+
+        }
+    }
+
+    private void restart() {
+        Intent intent = new Intent(this, ModuleActivity.class);
+        intent.putExtra(ModuleActivity.KEY_PARENT_MODULE, parentModule.getId());
+        intent.putExtra(KEY_PAGE, viewPager.getCurrentItem());
+        startActivity(intent);
+        finish();
     }
 }

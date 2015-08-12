@@ -22,6 +22,7 @@ public class ModuleFragmentAdapter extends FragmentStatePagerAdapter {
     public static final String TAG = ModuleFragmentAdapter.class.getSimpleName();
 //    private static final List<Fragment> fragments = new ArrayList<>();
 
+    private int count = -1;
     private final int rowCount;
     private final int columnCount;
     private final List<IModule> modules;
@@ -63,7 +64,10 @@ public class ModuleFragmentAdapter extends FragmentStatePagerAdapter {
         if (modules == null) {
             throw new IllegalStateException("Module list is null.");
         }
-        return (int) Math.round(Math.ceil((double) modules.size() / (rowCount * columnCount)));
+        if (count == -1) {
+            count = ((int) Math.round(Math.ceil((double) modules.size() / (rowCount * columnCount)))) + 1;
+        }
+        return count;
     }
 
     @Override

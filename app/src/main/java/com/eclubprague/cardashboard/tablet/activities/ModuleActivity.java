@@ -31,7 +31,6 @@ public class ModuleActivity extends SimplePagerActivity {
         } else {
             module = ModuleSupplier.getInstance().getHomeScreenModule(this);
         }
-        module.removeEmptyModules();
         setModule(module);
     }
 
