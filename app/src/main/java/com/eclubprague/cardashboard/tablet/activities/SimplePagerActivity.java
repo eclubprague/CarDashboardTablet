@@ -25,6 +25,7 @@ import com.eclubprague.cardashboard.core.modules.base.ModuleEvent;
 import com.eclubprague.cardashboard.core.modules.base.models.resources.StringResource;
 import com.eclubprague.cardashboard.core.modules.custom.ClockModule;
 import com.eclubprague.cardashboard.core.modules.predefined.EmptyModule;
+import com.eclubprague.cardashboard.core.preferences.SettingsActivity;
 import com.eclubprague.cardashboard.tablet.R;
 import com.eclubprague.cardashboard.tablet.adapters.ModuleFragmentAdapter;
 import com.eclubprague.cardashboard.tablet.model.modules.IModuleContextTabletActivity;
@@ -132,6 +133,8 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
             return true;
         }
 

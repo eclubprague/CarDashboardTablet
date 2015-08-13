@@ -2,8 +2,8 @@ package com.eclubprague.cardashboard.tablet.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.Menu;
-import android.view.MenuItem;
 
 import com.eclubprague.cardashboard.core.data.ModuleSupplier;
 import com.eclubprague.cardashboard.core.modules.base.IModule;
@@ -35,7 +35,7 @@ public class ModuleActivity extends SimplePagerActivity {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putSerializable(KEY_PARENT_MODULE, getParentModule().getId());
         super.onSaveInstanceState(outState);
     }
@@ -56,20 +56,5 @@ public class ModuleActivity extends SimplePagerActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_module, menu);
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }

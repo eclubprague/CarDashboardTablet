@@ -19,6 +19,7 @@
 
 
         </activity>
+        <activity android:name="com.eclubprague.cardashboard.core.preferences.SettingsActivity" />
     </application>
 
 </manifest>
