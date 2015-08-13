@@ -141,6 +141,42 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "starting  - listeners");
+        for(IActivityStateChangeListener listener : stateChangeListeners){
+            listener.onStart();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "resuming  - listeners");
+        for(IActivityStateChangeListener listener : stateChangeListeners){
+            listener.onResume();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "pausing  - listeners");
+        for(IActivityStateChangeListener listener : stateChangeListeners){
+            listener.onPause();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "stopping  - listeners");
+        for(IActivityStateChangeListener listener : stateChangeListeners){
+            listener.onStop();
+            Log.d(TAG, "stopping  - " + listener.getClass().getSimpleName());
+        }
+    }
 
     protected IParentModule getParentModule() {
         return parentModule;
@@ -223,6 +259,12 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
     @Override
     public void addListener(IActivityStateChangeListener listener) {
         stateChangeListeners.add(listener);
+        Log.d(TAG, "adding listener: " + listener.getClass().getSimpleName());
+    }
+
+    @Override
+    public void removeListener(IActivityStateChangeListener listener) {
+        stateChangeListeners.remove(listener);
     }
 
     @Override
