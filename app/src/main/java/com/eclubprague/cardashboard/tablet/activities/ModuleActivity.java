@@ -16,22 +16,31 @@ import java.util.List;
 
 public class ModuleActivity extends SimplePagerActivity {
     public static final String KEY_PARENT_MODULE = ModuleActivity.class.getName() + ".KEY_PARENT_MODULE";
+    public static final String KEY_PREVIOUS_PARENT_MODULE = ModuleActivity.class.getName() + ".KEY_PREVIOUS_PARENT_MODULE";
+
+    private IParentModule topParent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        IParentModule module;
-        if (savedInstanceState != null && savedInstanceState.getSerializable(KEY_PARENT_MODULE) != null) {
-            ModuleId parentModuleId = (ModuleId) savedInstanceState.getSerializable(KEY_PARENT_MODULE);
-            module = ModuleSupplier.getInstance().findSubmenuModule(this, parentModuleId);
-        } else if (getIntent() != null && getIntent().getSerializableExtra(KEY_PARENT_MODULE) != null) {
-            Intent intent = getIntent();
-            ModuleId parentModuleId = (ModuleId) intent.getSerializableExtra(KEY_PARENT_MODULE);
-            module = ModuleSupplier.getInstance().findSubmenuModule(this, parentModuleId);
-        } else {
-            module = ModuleSupplier.getInstance().getHomeScreenModule(this);
-        }
+        IParentModule module = getParentModule(savedInstanceState, KEY_PARENT_MODULE);
+        topParent = getParentModule(savedInstanceState, KEY_PREVIOUS_PARENT_MODULE);
         setModule(module);
+    }
+
+    private IParentModule getParentModule(Bundle savedInstanceState, String key){
+        IParentModule module;
+        if (savedInstanceState != null && savedInstanceState.getSerializable(key) != null) {
+            ModuleId parentModuleId = (ModuleId) savedInstanceState.getSerializable(key);
+            module = ModuleSupplier.getPersonalInstance().findSubmenuModule(this, parentModuleId);
+        } else if (getIntent() != null && getIntent().getSerializableExtra(key) != null) {
+            Intent intent = getIntent();
+            ModuleId parentModuleId = (ModuleId) intent.getSerializableExtra(key);
+            module = ModuleSupplier.getPersonalInstance().findSubmenuModule(this, parentModuleId);
+        } else {
+            module = ModuleSupplier.getPersonalInstance().getHomeScreenModule(this);
+        }
+        return module;
     }
 
     @Override
@@ -42,7 +51,7 @@ public class ModuleActivity extends SimplePagerActivity {
 
     @Override
     protected void adjustModules(IParentModule parentModule, List<IModule> modules) {
-        if (!parentModule.equals(ModuleSupplier.getInstance().getHomeScreenModule(this))) {
+        if (!parentModule.equals(ModuleSupplier.getPersonalInstance().getHomeScreenModule(this))) {
             if (modules.size() > 0) {
                 if (!(modules.get(0) instanceof BackModule)) {
                     modules.add(0, new BackModule(this, parentModule));

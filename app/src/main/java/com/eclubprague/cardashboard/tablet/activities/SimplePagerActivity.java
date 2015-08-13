@@ -23,9 +23,9 @@ import com.eclubprague.cardashboard.core.modules.base.IModuleContext;
 import com.eclubprague.cardashboard.core.modules.base.IParentModule;
 import com.eclubprague.cardashboard.core.modules.base.ModuleEvent;
 import com.eclubprague.cardashboard.core.modules.base.models.resources.StringResource;
-import com.eclubprague.cardashboard.core.modules.custom.ClockModule;
 import com.eclubprague.cardashboard.core.modules.predefined.EmptyModule;
 import com.eclubprague.cardashboard.core.preferences.SettingsActivity;
+import com.eclubprague.cardashboard.core.views.ModuleListDialogFragment;
 import com.eclubprague.cardashboard.tablet.R;
 import com.eclubprague.cardashboard.tablet.adapters.ModuleFragmentAdapter;
 import com.eclubprague.cardashboard.tablet.model.modules.IModuleContextTabletActivity;
@@ -247,7 +247,7 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
     }
 
     @Override
-    public void goBackFromSubmodules(IParentModule parentModule) {
+    public void goBackFromSubmodules(IParentModule previousParentModule) {
         finish();
     }
 
@@ -278,7 +278,7 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
 //                    Log.d(TAG, "module: " + m.getId() + ", title = " + m.getTitle().getString(this));
 //                }
 //                Log.d(TAG, "removing module {" + module.getTitle().getString(this) + "}: " + module.toString());
-                modules.set(modules.indexOf(module), new EmptyModule(this, parentModule));
+                modules.set(modules.indexOf(module), new EmptyModule(this));
                 restart();
                 break;
             case MOVE:
@@ -287,8 +287,9 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
                 toggleQuickMenu(module, false);
                 break;
             case ADD:
-                modules.set(modules.indexOf(module), new ClockModule(this, parentModule));
-                restart();
+                ModuleListDialogFragment dialog = ModuleListDialogFragment.newInstance(this);
+                dialog.show(getFragmentManager(), "Applist");
+//                restart();
                 break;
 
         }
