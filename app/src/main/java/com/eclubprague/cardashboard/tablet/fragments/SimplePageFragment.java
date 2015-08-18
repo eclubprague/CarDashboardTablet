@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -164,33 +163,33 @@ public class SimplePageFragment extends Fragment {
                     }
                 });
 
-                view.setOnDragListener(new View.OnDragListener() {
-                    @Override
-                    public boolean onDrag(View v, DragEvent event) {
-                        switch (event.getAction()) {
-                            case DragEvent.ACTION_DRAG_STARTED:
-                                Log.d(TAG, "drag started");
-                                break;
-                            case DragEvent.ACTION_DRAG_ENDED:
-                                Log.d(TAG, "drag ended");
-                                break;
-                            case DragEvent.ACTION_DRAG_ENTERED:
-                                Log.d(TAG, "drag entered");
-                                break;
-                            case DragEvent.ACTION_DRAG_EXITED:
-                                Log.d(TAG, "drag exited");
-                                break;
-                            case DragEvent.ACTION_DRAG_LOCATION:
-                                Log.d(TAG, "drag location");
-                                break;
-                            case DragEvent.ACTION_DROP:
-                                Log.d(TAG, "drag drop");
-                                break;
-                        }
-                        Log.d(TAG, "location = " + event.getX() + ":" + event.getY());
-                        return false;
-                    }
-                });
+//                view.setOnDragListener(new View.OnDragListener() {
+//                    @Override
+//                    public boolean onDrag(View v, DragEvent event) {
+//                        switch (event.getAction()) {
+//                            case DragEvent.ACTION_DRAG_STARTED:
+//                                Log.d(TAG, "drag started");
+//                                break;
+//                            case DragEvent.ACTION_DRAG_ENDED:
+//                                Log.d(TAG, "drag ended");
+//                                break;
+//                            case DragEvent.ACTION_DRAG_ENTERED:
+//                                Log.d(TAG, "drag entered");
+//                                break;
+//                            case DragEvent.ACTION_DRAG_EXITED:
+//                                Log.d(TAG, "drag exited");
+//                                break;
+//                            case DragEvent.ACTION_DRAG_LOCATION:
+//                                Log.d(TAG, "drag location");
+//                                break;
+//                            case DragEvent.ACTION_DROP:
+//                                Log.d(TAG, "drag drop");
+//                                break;
+//                        }
+//                        Log.d(TAG, "location = " + event.getX() + ":" + event.getY());
+//                        return false;
+//                    }
+//                });
                 //view = ViewUtils.setSize(view, getOptimalCardSize().width, getOptimalCardSize().height);
             } else {
                 view = convertView;

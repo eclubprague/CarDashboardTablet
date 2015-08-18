@@ -228,15 +228,21 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
     public void toggleQuickMenu(IModule module, boolean activate) {
         if (activate) {
             ViewSwitcher holder = (ViewSwitcher) module.getHolder();
-            holder.showNext();
-            Log.d(TAG, "Toggling quick menu: activating, content: " + holder.getChildCount());
-            for (int i = 0; i < holder.getChildCount(); i++) {
-                Log.d(TAG, "child at " + i + ": " + holder.getChildAt(i));
+//            holder.showNext();
+            if (holder.getDisplayedChild() != 1) {
+                holder.setDisplayedChild(1);
             }
+//            Log.d(TAG, "Toggling quick menu: activating, content: " + holder.getChildCount());
+//            for (int i = 0; i < holder.getChildCount(); i++) {
+//                Log.d(TAG, "child at " + i + ": " + holder.getChildAt(i));
+//            }
         } else {
             ViewSwitcher holder = (ViewSwitcher) module.getHolder();
-            holder.showPrevious();
-            Log.d(TAG, "Toggling quick menu: deactivating, content: " + holder.getChildCount());
+//            holder.showPrevious();
+            if (holder.getDisplayedChild() != 0) {
+                holder.setDisplayedChild(0);
+            }
+//            Log.d(TAG, "Toggling quick menu: deactivating, content: " + holder.getChildCount());
         }
     }
 
