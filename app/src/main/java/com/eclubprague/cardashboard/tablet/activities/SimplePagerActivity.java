@@ -111,6 +111,22 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
                 Log.d(TAG, "recreating activity layout");
                 viewPager.setAdapter(pagerAdapter);
                 viewPager.setCurrentItem(page);
+                viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                    @Override
+                    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+                    }
+
+                    @Override
+                    public void onPageSelected(int position) {
+                        turnQuickMenusOff();
+                    }
+
+                    @Override
+                    public void onPageScrollStateChanged(int state) {
+
+                    }
+                });
             }
         });
     }
@@ -268,7 +284,7 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
     }
 
     @Override
-    public void onModuleEvent(IModule module, ModuleEvent event) {
+    public void onModuleEvent(final IModule module, ModuleEvent event) {
         switch (event) {
             case CANCEL:
                 toggleQuickMenu(module, false);
@@ -287,7 +303,13 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
                 toggleQuickMenu(module, false);
                 break;
             case ADD:
-                ModuleListDialogFragment dialog = ModuleListDialogFragment.newInstance(this);
+                ModuleListDialogFragment dialog = ModuleListDialogFragment.newInstance(this, new ModuleListDialogFragment.OnAddModuleListener() {
+                    @Override
+                    public void addModule(IModule newModule) {
+                        modules.set(modules.indexOf(module), newModule);
+                        restart();
+                    }
+                });
                 dialog.show(getFragmentManager(), "Applist");
 //                restart();
                 break;
