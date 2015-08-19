@@ -67,6 +67,16 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
         } else {
             page = DEFAULT_PAGE;
         }
+
+
+//        try {
+//            ModuleDAO moduleDAO = new ModuleDAO(this);
+//            String data = moduleDAO.writeParentModule(ModuleSupplier.getBaseInstance().getHomeScreenModule(this));
+//            IParentModule parentModule = moduleDAO.readParentModule(data);
+//            goToSubmodules(parentModule);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         // determine size
     }
 

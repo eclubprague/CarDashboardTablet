@@ -56,6 +56,8 @@ public class ModuleActivity extends SimplePagerActivity {
                 if (!(modules.get(0) instanceof BackModule)) {
                     modules.add(0, new BackModule(this, parentModule));
                 }
+            } else {
+                modules.add(new BackModule(this, parentModule));
             }
         }
     }
