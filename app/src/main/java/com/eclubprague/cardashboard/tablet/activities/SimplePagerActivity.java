@@ -17,6 +17,7 @@ import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
 import android.widget.ViewSwitcher;
 
+import com.eclubprague.cardashboard.core.data.ModuleSupplier;
 import com.eclubprague.cardashboard.core.modules.base.IActivityStateChangeListener;
 import com.eclubprague.cardashboard.core.modules.base.IModule;
 import com.eclubprague.cardashboard.core.modules.base.IModuleContext;
@@ -31,6 +32,7 @@ import com.eclubprague.cardashboard.tablet.adapters.ModuleFragmentAdapter;
 import com.eclubprague.cardashboard.tablet.model.modules.IModuleContextTabletActivity;
 import com.eclubprague.cardashboard.tablet.utils.CardSizeUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -191,6 +193,11 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
         Log.d(TAG, "pausing  - listeners");
         for(IActivityStateChangeListener listener : stateChangeListeners){
             listener.onPause();
+        }
+        try {
+            ModuleSupplier.getPersonalInstance().save(this);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

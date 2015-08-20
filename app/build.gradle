@@ -21,5 +21,6 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile project(':CarDashboardCore')
+    compile project(':cardashboardcore')
+    testCompile "org.robolectric:robolectric:3.0"
 }
