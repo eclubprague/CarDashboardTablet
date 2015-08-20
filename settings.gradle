@@ -1,1 +1,1 @@
-include ':app', ':cardashboardcore'
+include ':app', ':CarDashboardCore'
