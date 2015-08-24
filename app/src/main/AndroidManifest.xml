@@ -8,18 +8,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
         android:name="com.eclubprague.cardashboard.core.application.UpdateApplication">
-        <activity
-            android:name=".activities.ModuleActivity"
-            android:configChanges="orientation|keyboard|screenSize"
-            android:label="@string/title_activity_module">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-
-
-        </activity>
-        <activity android:name="com.eclubprague.cardashboard.core.preferences.SettingsActivity" />
+        <activity android:name="com.eclubprague.cardashboard.tablet.activities.SimplePagerActivity" />
     </application>
 
 </manifest>

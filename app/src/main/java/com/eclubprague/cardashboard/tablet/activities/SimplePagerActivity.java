@@ -17,6 +17,7 @@ import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
 import android.widget.ViewSwitcher;
 
+import com.eclubprague.cardashboard.core.application.GlobalApplication;
 import com.eclubprague.cardashboard.core.data.ModuleSupplier;
 import com.eclubprague.cardashboard.core.fragments.ModuleListDialogFragment;
 import com.eclubprague.cardashboard.core.modules.base.IActivityStateChangeListener;
@@ -24,7 +25,9 @@ import com.eclubprague.cardashboard.core.modules.base.IModule;
 import com.eclubprague.cardashboard.core.modules.base.IModuleContext;
 import com.eclubprague.cardashboard.core.modules.base.IParentModule;
 import com.eclubprague.cardashboard.core.modules.base.ModuleEvent;
+import com.eclubprague.cardashboard.core.modules.base.models.ModuleId;
 import com.eclubprague.cardashboard.core.modules.base.models.resources.StringResource;
+import com.eclubprague.cardashboard.core.modules.predefined.BackModule;
 import com.eclubprague.cardashboard.core.modules.predefined.EmptyModule;
 import com.eclubprague.cardashboard.core.preferences.SettingsActivity;
 import com.eclubprague.cardashboard.tablet.R;
@@ -36,10 +39,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-abstract public class SimplePagerActivity extends Activity implements IModuleContextTabletActivity {
+public class SimplePagerActivity extends Activity implements IModuleContextTabletActivity {
 
     private static final String TAG = SimplePagerActivity.class.getSimpleName();
-    private static final String KEY_PAGE = SimplePagerActivity.class.getName() + ".keyPage";
+    private static final String KEY_PAGE = SimplePagerActivity.class.getName() + ".KEY_PAGE";
+    public static final String KEY_PARENT_MODULE = SimplePagerActivity.class.getName() + ".KEY_PARENT_MODULE";
+    public static final String KEY_PREVIOUS_PARENT_MODULE = SimplePagerActivity.class.getName() + ".KEY_PREVIOUS_PARENT_MODULE";
     private static final int DEFAULT_PAGE = 0;
 
     private ViewPager viewPager;
@@ -48,6 +53,7 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
     private List<IActivityStateChangeListener> stateChangeListeners = new ArrayList<>();
     private List<IModule> modules;
     private IParentModule parentModule;
+    private IParentModule topParent;
 
     private int page = DEFAULT_PAGE;
 
@@ -55,6 +61,7 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_simple_pager);
+        GlobalApplication.getInstance().setModuleContext(this);
 //        viewPager = new ViewPager(this);
 //        ViewGroup root = (ViewGroup) findViewById(R.id.simplepager_root_layout);
 //        viewPager.setId(R.id.viewpager);
@@ -80,6 +87,24 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
 //            e.printStackTrace();
 //        }
         // determine size
+        IParentModule module = getParentModule(savedInstanceState, KEY_PARENT_MODULE);
+        topParent = getParentModule(savedInstanceState, KEY_PREVIOUS_PARENT_MODULE);
+        setModule(module);
+    }
+
+    private IParentModule getParentModule(Bundle savedInstanceState, String key) {
+        IParentModule module;
+        if (savedInstanceState != null && savedInstanceState.getSerializable(key) != null) {
+            ModuleId parentModuleId = (ModuleId) savedInstanceState.getSerializable(key);
+            module = ModuleSupplier.getPersonalInstance().findSubmenuModule(this, parentModuleId);
+        } else if (getIntent() != null && getIntent().getSerializableExtra(key) != null) {
+            Intent intent = getIntent();
+            ModuleId parentModuleId = (ModuleId) intent.getSerializableExtra(key);
+            module = ModuleSupplier.getPersonalInstance().findSubmenuModule(this, parentModuleId);
+        } else {
+            module = ModuleSupplier.getPersonalInstance().getHomeScreenModule(this);
+        }
+        return module;
     }
 
     @Override
@@ -91,6 +116,7 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putInt(KEY_PAGE, viewPager.getCurrentItem());
+        outState.putSerializable(KEY_PARENT_MODULE, getParentModule().getId());
         super.onSaveInstanceState(outState);
     }
 
@@ -142,8 +168,6 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
             }
         });
     }
-
-    protected abstract void adjustModules(IParentModule parentModule, List<IModule> modules);
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -220,15 +244,15 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
         getActionBar().setIcon(parentModule.getIcon().getIcon(this));
         this.parentModule = parentModule;
         this.parentModule.removeTailEmptyModules();
-        this.modules = this.parentModule.getSubmodules(this);
+        this.modules = this.parentModule.getSubmodules();
 //        parentModule.removeTailEmptyModules();
         initPager();
     }
 
     @Override
     public void goToSubmodules(IParentModule parentModule) {
-        Intent intent = new Intent(this, ModuleActivity.class);
-        intent.putExtra(ModuleActivity.KEY_PARENT_MODULE, parentModule.getId());
+        Intent intent = new Intent(this, SimplePagerActivity.class);
+        intent.putExtra(SimplePagerActivity.KEY_PARENT_MODULE, parentModule.getId());
         // DOES NOT WORK (problem with homescreen parent without a view, doesnt work anyway)
 //        String transitionName = getString(R.string.transition_card);
 //        Log.d(TAG, parentModule.toString());
@@ -266,7 +290,7 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
     @Override
     public void turnQuickMenusOff() {
         for (IModule module : modules) {
-            module.onCancel(this);
+            module.onEvent(ModuleEvent.CANCEL, this);
         }
     }
 
@@ -278,11 +302,6 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage(errorMessage.getString(this)).create().show();
         }
-    }
-
-    @Override
-    public void swapModules(IModule oldModule, IModule newModule, boolean animate) {
-
     }
 
     @Override
@@ -317,7 +336,7 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
 //                    Log.d(TAG, "module: " + m.getId() + ", title = " + m.getTitle().getString(this));
 //                }
 //                Log.d(TAG, "removing module {" + module.getTitle().getString(this) + "}: " + module.toString());
-                modules.set(modules.indexOf(module), new EmptyModule(this));
+                modules.set(modules.indexOf(module), new EmptyModule());
                 restart();
                 break;
             case MOVE:
@@ -340,9 +359,21 @@ abstract public class SimplePagerActivity extends Activity implements IModuleCon
         }
     }
 
+    protected void adjustModules(IParentModule parentModule, List<IModule> modules) {
+        if (!parentModule.equals(ModuleSupplier.getPersonalInstance().getHomeScreenModule(this))) {
+            if (modules.size() > 0) {
+                if (!(modules.get(0) instanceof BackModule)) {
+                    modules.add(0, new BackModule(parentModule));
+                }
+            } else {
+                modules.add(new BackModule(parentModule));
+            }
+        }
+    }
+
     private void restart() {
-        Intent intent = new Intent(this, ModuleActivity.class);
-        intent.putExtra(ModuleActivity.KEY_PARENT_MODULE, parentModule.getId());
+        Intent intent = new Intent(this, SimplePagerActivity.class);
+        intent.putExtra(SimplePagerActivity.KEY_PARENT_MODULE, parentModule.getId());
         intent.putExtra(KEY_PAGE, viewPager.getCurrentItem());
         startActivity(intent);
         finish();

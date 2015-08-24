@@ -153,8 +153,8 @@ public class SimplePageFragment extends Fragment {
             if (convertView == null) {
 //                Log.d(TAG, modules.size() + " <= " + position);
                 IModule module = modules.get(position);
-                ViewSwitcher viewHolder = (ViewSwitcher) module.createViewWithHolder(getActivity(), R.layout.module_holder, parent).holder;
-                viewHolder.addView(module.createQuickMenuView(getActivity(), viewHolder));
+                ViewSwitcher viewHolder = (ViewSwitcher) module.createViewWithHolder(moduleContext, R.layout.module_holder, parent).holder;
+                viewHolder.addView(module.createQuickMenuView(moduleContext, viewHolder));
                 view = viewHolder;
                 view.setOnClickListener(new View.OnClickListener() {
                     @Override

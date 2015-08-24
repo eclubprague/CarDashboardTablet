@@ -83,7 +83,7 @@ public class ModuleFragmentAdapter extends FragmentStatePagerAdapter {
         int modulesPerPage = rowCount * columnCount;
         int start = page * modulesPerPage;
         while (modules.size() < start + modulesPerPage) {
-            modules.add(new EmptyModule(moduleContext));
+            modules.add(new EmptyModule());
         }
         int end = (modules.size() < start + modulesPerPage) ? modules.size() : start + modulesPerPage;
         return new ArrayList<>(modules.subList(start, end));
