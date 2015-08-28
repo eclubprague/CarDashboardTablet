@@ -30,6 +30,7 @@ import com.eclubprague.cardashboard.core.modules.base.models.resources.StringRes
 import com.eclubprague.cardashboard.core.modules.predefined.BackModule;
 import com.eclubprague.cardashboard.core.modules.predefined.EmptyModule;
 import com.eclubprague.cardashboard.core.preferences.SettingsActivity;
+import com.eclubprague.cardashboard.core.utils.ErrorReporter;
 import com.eclubprague.cardashboard.tablet.R;
 import com.eclubprague.cardashboard.tablet.adapters.ModuleFragmentAdapter;
 import com.eclubprague.cardashboard.tablet.model.modules.IModuleContextTabletActivity;
@@ -51,7 +52,6 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     private PagerAdapter pagerAdapter;
 
     private List<IActivityStateChangeListener> stateChangeListeners = new ArrayList<>();
-    private List<IModule> modules;
     private IParentModule parentModule;
     private IParentModule topParent;
 
@@ -93,16 +93,17 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     }
 
     private IParentModule getParentModule(Bundle savedInstanceState, String key) {
+        ModuleSupplier moduleSupplier = ModuleSupplier.getPersonalInstance();
         IParentModule module;
         if (savedInstanceState != null && savedInstanceState.getSerializable(key) != null) {
             ModuleId parentModuleId = (ModuleId) savedInstanceState.getSerializable(key);
-            module = ModuleSupplier.getPersonalInstance().findSubmenuModule(this, parentModuleId);
+            module = moduleSupplier.findSubmenuModule(this, parentModuleId);
         } else if (getIntent() != null && getIntent().getSerializableExtra(key) != null) {
             Intent intent = getIntent();
             ModuleId parentModuleId = (ModuleId) intent.getSerializableExtra(key);
-            module = ModuleSupplier.getPersonalInstance().findSubmenuModule(this, parentModuleId);
+            module = moduleSupplier.findSubmenuModule(this, parentModuleId);
         } else {
-            module = ModuleSupplier.getPersonalInstance().getHomeScreenModule(this);
+            module = moduleSupplier.getHomeScreenModule(this);
         }
         return module;
     }
@@ -140,12 +141,16 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
                 int columnCount = tableSize.width;
                 int rowCount = tableSize.height;
 
-                adjustModules(parentModule, modules);
+                insertBackButton();
+                Log.d(TAG, "Adjusted modules in: " + parentModule);
+                for (IModule m : parentModule.getSubmodules()) {
+                    Log.d(TAG, m.toString());
+                }
 //                Log.d(TAG, "modules size = " + modules.size() + ", pageCount = " + getPageCount() + ", per page = " + getModulesPerPageCount());
 
 //                Log.d(TAG, "modules new size = " + modules.size());
 
-                pagerAdapter = new ModuleFragmentAdapter(getFragmentManager(), rowCount, columnCount, modules, thisModuleContext, parentModule);
+                pagerAdapter = new ModuleFragmentAdapter(getFragmentManager(), rowCount, columnCount, parentModule.getSubmodules(), thisModuleContext, parentModule);
                 Log.d(TAG, "recreating activity layout");
                 viewPager.setAdapter(pagerAdapter);
                 viewPager.setCurrentItem(page);
@@ -209,11 +214,13 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
         for(IActivityStateChangeListener listener : stateChangeListeners){
             listener.onResume();
         }
+        insertBackButton();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        removeBackButton();
         Log.d(TAG, "pausing  - listeners");
         for(IActivityStateChangeListener listener : stateChangeListeners){
             listener.onPause();
@@ -231,7 +238,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
         Log.d(TAG, "stopping  - listeners");
         for(IActivityStateChangeListener listener : stateChangeListeners){
             listener.onStop();
-            Log.d(TAG, "stopping  - " + listener.getClass().getSimpleName());
+//            Log.d(TAG, "stopping  - " + listener.getClass().getSimpleName());
         }
     }
 
@@ -244,7 +251,6 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
         getActionBar().setIcon(parentModule.getIcon().getIcon(this));
         this.parentModule = parentModule;
         this.parentModule.removeTailEmptyModules();
-        this.modules = this.parentModule.getSubmodules();
 //        parentModule.removeTailEmptyModules();
         initPager();
     }
@@ -289,7 +295,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
 
     @Override
     public void turnQuickMenusOff() {
-        for (IModule module : modules) {
+        for (IModule module : parentModule.getSubmodules()) {
             module.onEvent(ModuleEvent.CANCEL, this);
         }
     }
@@ -336,7 +342,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
 //                    Log.d(TAG, "module: " + m.getId() + ", title = " + m.getTitle().getString(this));
 //                }
 //                Log.d(TAG, "removing module {" + module.getTitle().getString(this) + "}: " + module.toString());
-                modules.set(modules.indexOf(module), new EmptyModule());
+                parentModule.getSubmodules().set(parentModule.getSubmodules().indexOf(module), new EmptyModule());
                 restart();
                 break;
             case MOVE:
@@ -348,7 +354,22 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
                 ModuleListDialogFragment dialog = ModuleListDialogFragment.newInstance(this, new ModuleListDialogFragment.OnAddModuleListener() {
                     @Override
                     public void addModule(IModule newModule) {
-                        modules.set(modules.indexOf(module), newModule);
+                        try {
+                            newModule = newModule.copyDeep();
+                        } catch (ReflectiveOperationException e) {
+                            ErrorReporter.reportApplicationError(null,
+                                    ErrorReporter.ERROR_INTERNAL,
+                                    StringResource.fromString(e.getMessage()),
+                                    StringResource.fromString("Sorry, our fault. Report this."));
+                        }
+                        int modulePosition = parentModule.getSubmodules().indexOf(module);
+                        Log.d(TAG, "Looking for module: " + module);
+                        for (IModule m : parentModule.getSubmodules()) {
+                            Log.d(TAG, m.toString());
+                        }
+
+                        parentModule.getSubmodules().set(modulePosition, newModule);
+                        Log.d(TAG, "Adding new module: " + newModule.getClass().getSimpleName() + ", id: " + newModule.getId() + " to module: " + parentModule.getId() + " on position: " + modulePosition);
                         restart();
                     }
                 });
@@ -359,15 +380,29 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
         }
     }
 
-    protected void adjustModules(IParentModule parentModule, List<IModule> modules) {
+    private void insertBackButton() {
+        Log.d(TAG, "Adjusting module: " + parentModule);
         if (!parentModule.equals(ModuleSupplier.getPersonalInstance().getHomeScreenModule(this))) {
-            if (modules.size() > 0) {
-                if (!(modules.get(0) instanceof BackModule)) {
-                    modules.add(0, new BackModule(parentModule));
+            Log.d(TAG, "It's not a root, still adjusting module: " + parentModule);
+            if (parentModule.getSubmodules().size() > 0) {
+                Log.d(TAG, "Size is good enough, still adjusting: " + parentModule);
+                if (!(parentModule.getSubmodules().get(0) instanceof BackModule)) {
+                    Log.d(TAG, "Adding back module: " + parentModule + ", see:");
+                    parentModule.getSubmodules().add(0, new BackModule(topParent));
+                    for (IModule m : parentModule.getSubmodules()) {
+                        Log.d(TAG, m.toString());
+                    }
                 }
             } else {
-                modules.add(new BackModule(parentModule));
+                Log.d(TAG, "Ading back module to the end: " + parentModule);
+                parentModule.getSubmodules().add(new BackModule(topParent));
             }
+        }
+    }
+
+    private void removeBackButton() {
+        if (parentModule.getSubmodules().size() > 0 && parentModule.getSubmodules().get(0) instanceof BackModule) {
+            parentModule.getSubmodules().remove(0);
         }
     }
 

@@ -13,6 +13,7 @@ import android.widget.ViewSwitcher;
 
 import com.eclubprague.cardashboard.core.modules.base.IModule;
 import com.eclubprague.cardashboard.core.modules.base.IModuleContext;
+import com.eclubprague.cardashboard.core.views.ModuleView;
 import com.eclubprague.cardashboard.tablet.R;
 import com.eclubprague.cardashboard.tablet.model.modules.IModuleContextTabletActivity;
 import com.eclubprague.cardashboard.tablet.utils.CardSizeUtils;
@@ -162,6 +163,8 @@ public class SimplePageFragment extends Fragment {
                         moduleContext.turnQuickMenusOff();
                     }
                 });
+                Log.d(TAG, "Setting module {" + modules.get(position).getClass().getSimpleName() + "} with id: " + modules.get(position).getId() + " on position: " + position
+                        + " with view: " + ((ModuleView) viewHolder.getChildAt(0)).thisId);
 
 //                view.setOnDragListener(new View.OnDragListener() {
 //                    @Override
