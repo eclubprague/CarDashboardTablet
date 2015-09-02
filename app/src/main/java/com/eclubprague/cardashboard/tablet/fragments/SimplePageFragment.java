@@ -3,7 +3,6 @@ package com.eclubprague.cardashboard.tablet.fragments;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,7 +53,7 @@ public class SimplePageFragment extends Fragment {
      * @return A new instance of fragment SimplePageFragment.
      */
     public static SimplePageFragment newInstance(List<IModule> modules, int rowCount, int columnCount) {
-        Log.d(TAG, "recreating fragment: newInstance");
+//        Log.d(TAG, "recreating fragment: newInstance");
         SimplePageFragment fragment = new SimplePageFragment();
         fragment.setModules(modules);
         fragment.setRowCount(rowCount);
@@ -69,7 +68,7 @@ public class SimplePageFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "recreating fragment");
+//        Log.d(TAG, "recreating fragment");
     }
 
     @Override
@@ -157,9 +156,9 @@ public class SimplePageFragment extends Fragment {
                 IModule module = modules.get(position);
                 ViewWithHolder<ModuleView> viewWithHolder = module.createViewWithHolder(moduleContext, R.layout.module_holder, parent);
                 ViewSwitcher viewHolder = (ViewSwitcher) viewWithHolder.holder;
-                View v = viewWithHolder.view;
-                Log.d(TAG, "Got view of module: " + module + ", which is: " + v);
-                viewHolder.addView(module.createQuickMenuView(moduleContext, viewHolder));
+                ModuleView v = viewWithHolder.view;
+//                Log.d(TAG, "Got view of module: " + module + ", which is: " + v);
+                viewHolder.addView(module.createQuickMenuView(v, moduleContext, viewHolder));
                 view = viewHolder;
                 view.setOnClickListener(new View.OnClickListener() {
                     @Override
