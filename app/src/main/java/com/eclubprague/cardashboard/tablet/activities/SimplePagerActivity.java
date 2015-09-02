@@ -30,13 +30,14 @@ import com.eclubprague.cardashboard.core.modules.base.models.resources.StringRes
 import com.eclubprague.cardashboard.core.modules.predefined.BackModule;
 import com.eclubprague.cardashboard.core.modules.predefined.EmptyModule;
 import com.eclubprague.cardashboard.core.preferences.SettingsActivity;
+import com.eclubprague.cardashboard.core.utils.ListUtils;
+import com.eclubprague.cardashboard.core.views.ModuleView;
 import com.eclubprague.cardashboard.tablet.R;
 import com.eclubprague.cardashboard.tablet.adapters.ModuleFragmentAdapter;
 import com.eclubprague.cardashboard.tablet.model.modules.IModuleContextTabletActivity;
 import com.eclubprague.cardashboard.tablet.utils.CardSizeUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class SimplePagerActivity extends Activity implements IModuleContextTabletActivity {
@@ -50,7 +51,6 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     private ViewPager viewPager;
     private PagerAdapter pagerAdapter;
 
-    private List<IActivityStateChangeListener> stateChangeListeners = new ArrayList<>();
     private List<IModule> modules;
     private IParentModule parentModule;
     private IParentModule topParent;
@@ -196,27 +196,26 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d(TAG, "starting  - listeners");
-        for(IActivityStateChangeListener listener : stateChangeListeners){
-            listener.onStart();
+        GlobalApplication.getInstance().setModuleContext(this);
+        for (IActivityStateChangeListener listener : modules) {
+            listener.onStart(this);
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "resuming  - listeners");
-        for(IActivityStateChangeListener listener : stateChangeListeners){
-            listener.onResume();
+        GlobalApplication.getInstance().setModuleContext(this);
+        for (IActivityStateChangeListener listener : modules) {
+            listener.onResume(this);
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(TAG, "pausing  - listeners");
-        for(IActivityStateChangeListener listener : stateChangeListeners){
-            listener.onPause();
+        for (IActivityStateChangeListener listener : modules) {
+            listener.onPause(this);
         }
         try {
             ModuleSupplier.getPersonalInstance().save(this);
@@ -228,11 +227,17 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d(TAG, "stopping  - listeners");
-        for(IActivityStateChangeListener listener : stateChangeListeners){
-            listener.onStop();
-            Log.d(TAG, "stopping  - " + listener.getClass().getSimpleName());
+        for (IActivityStateChangeListener listener : modules) {
+            listener.onStop(this);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        for (IActivityStateChangeListener listener : modules) {
+            listener.onDestroy(this);
+        }
+        super.onDestroy();
     }
 
     protected IParentModule getParentModule() {
@@ -258,7 +263,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
 //        Log.d(TAG, parentModule.toString());
 //        ActivityOptionsCompat options =
 //                ActivityOptionsCompat.makeSceneTransitionAnimation(this,
-//                        parentModule.getView(),   // The view which starts the transition
+//                        parentModule.getViews(),   // The view which starts the transition
 //                        transitionName    // The transitionName of the view we’re transitioning to
 //                );
 //        ActivityCompat.startActivity(this, intent, options.toBundle());
@@ -266,9 +271,9 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     }
 
     @Override
-    public void toggleQuickMenu(IModule module, boolean activate) {
+    public void toggleQuickMenu(IModule module, ModuleView moduleView, boolean activate) {
         if (activate) {
-            ViewSwitcher holder = (ViewSwitcher) module.getHolder();
+            ViewSwitcher holder = (ViewSwitcher) moduleView.getViewHolder();
 //            holder.showNext();
             if (holder.getDisplayedChild() != 1) {
                 holder.setDisplayedChild(1);
@@ -278,7 +283,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
 //                Log.d(TAG, "child at " + i + ": " + holder.getChildAt(i));
 //            }
         } else {
-            ViewSwitcher holder = (ViewSwitcher) module.getHolder();
+            ViewSwitcher holder = (ViewSwitcher) moduleView.getViewHolder();
 //            holder.showPrevious();
             if (holder.getDisplayedChild() != 0) {
                 holder.setDisplayedChild(0);
@@ -290,7 +295,9 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     @Override
     public void turnQuickMenusOff() {
         for (IModule module : modules) {
-            module.onEvent(ModuleEvent.CANCEL, this);
+            for (ModuleView moduleView : module.getViews(this)) {
+                module.onEvent(ModuleEvent.CANCEL, moduleView, this);
+            }
         }
     }
 
@@ -315,40 +322,30 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     }
 
     @Override
-    public void addListener(IActivityStateChangeListener listener) {
-        stateChangeListeners.add(listener);
-        Log.d(TAG, "adding listener: " + listener.getClass().getSimpleName());
-    }
-
-    @Override
-    public void removeListener(IActivityStateChangeListener listener) {
-        stateChangeListeners.remove(listener);
-    }
-
-    @Override
-    public void onModuleEvent(final IModule module, ModuleEvent event) {
+    public void onModuleEvent(final IModule module, ModuleView moduleView, ModuleEvent event) {
+        final int indexOf = ListUtils.getNthIndexOf(modules, module, module.getViews(this).indexOf(moduleView));
         switch (event) {
             case CANCEL:
-                toggleQuickMenu(module, false);
+                toggleQuickMenu(module, moduleView, false);
                 break;
             case DELETE:
 //                for(IModule m : modules){
 //                    Log.d(TAG, "module: " + m.getId() + ", title = " + m.getTitle().getString(this));
 //                }
 //                Log.d(TAG, "removing module {" + module.getTitle().getString(this) + "}: " + module.toString());
-                modules.set(modules.indexOf(module), new EmptyModule());
+                modules.set(indexOf, new EmptyModule());
                 restart();
                 break;
             case MOVE:
-//                View.DragShadowBuilder myShadow = new View.DragShadowBuilder(module.getView());
+//                View.DragShadowBuilder myShadow = new View.DragShadowBuilder(module.getViews());
 //                module.getHolder().startDrag(null, myShadow, null, 0);
-                toggleQuickMenu(module, false);
+                toggleQuickMenu(module, moduleView, false);
                 break;
             case ADD:
                 ModuleListDialogFragment dialog = ModuleListDialogFragment.newInstance(this, new ModuleListDialogFragment.OnAddModuleListener() {
                     @Override
                     public void addModule(IModule newModule) {
-                        modules.set(modules.indexOf(module), newModule);
+                        modules.set(indexOf, newModule);
                         restart();
                     }
                 });

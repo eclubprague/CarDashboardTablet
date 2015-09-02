@@ -8,7 +8,10 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
-        <activity android:name="com.eclubprague.cardashboard.tablet.activities.SimplePagerActivity">
+        <activity
+            android:name="com.eclubprague.cardashboard.tablet.activities.SimplePagerActivity"
+            android:configChanges="orientation|keyboard|screenSize"
+            android:label="@string/title_activity_module">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
