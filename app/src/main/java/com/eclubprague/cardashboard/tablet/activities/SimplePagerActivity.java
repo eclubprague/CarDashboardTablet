@@ -356,6 +356,11 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
         }
     }
 
+    @Override
+    public Activity getActivity() {
+        return this;
+    }
+
     protected void adjustModules(IParentModule parentModule, List<IModule> modules) {
         if (!parentModule.equals(ModuleSupplier.getPersonalInstance().getHomeScreenModule(this))) {
             if (modules.size() > 0) {
