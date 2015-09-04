@@ -157,7 +157,8 @@ public class SimplePageFragment extends Fragment {
                 ViewWithHolder<ModuleView> viewWithHolder = module.createViewWithHolder(moduleContext, R.layout.module_holder, parent);
                 ViewSwitcher viewHolder = (ViewSwitcher) viewWithHolder.holder;
                 ModuleView v = viewWithHolder.view;
-//                Log.d(TAG, "Got view of module: " + module + ", which is: " + v);
+//                Log.d(TAG, "Got view of module: " + module);
+//                Log.d(TAG, "which is: " + v);
                 viewHolder.addView(module.createQuickMenuView(v, moduleContext, viewHolder));
                 view = viewHolder;
                 view.setOnClickListener(new View.OnClickListener() {
@@ -198,6 +199,9 @@ public class SimplePageFragment extends Fragment {
             } else {
                 view = convertView;
             }
+            ViewSwitcher v = (ViewSwitcher) view;
+            ModuleView childAt = (ModuleView) v.getChildAt(0);
+            childAt.toString();
             return view;
         }
     }

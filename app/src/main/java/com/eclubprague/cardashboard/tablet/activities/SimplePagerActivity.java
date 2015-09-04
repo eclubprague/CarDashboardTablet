@@ -19,6 +19,9 @@ import android.widget.ViewSwitcher;
 
 import com.eclubprague.cardashboard.core.application.GlobalApplication;
 import com.eclubprague.cardashboard.core.data.ModuleSupplier;
+import com.eclubprague.cardashboard.core.data.database.ModuleDAO;
+import com.eclubprague.cardashboard.core.data.modules.ModuleEnum;
+import com.eclubprague.cardashboard.core.data.modules.ModuleType;
 import com.eclubprague.cardashboard.core.fragments.ModuleListDialogFragment;
 import com.eclubprague.cardashboard.core.modules.base.IActivityStateChangeListener;
 import com.eclubprague.cardashboard.core.modules.base.IModule;
@@ -28,9 +31,9 @@ import com.eclubprague.cardashboard.core.modules.base.ModuleEvent;
 import com.eclubprague.cardashboard.core.modules.base.models.ModuleId;
 import com.eclubprague.cardashboard.core.modules.base.models.resources.StringResource;
 import com.eclubprague.cardashboard.core.modules.predefined.BackModule;
-import com.eclubprague.cardashboard.core.modules.predefined.EmptyModule;
 import com.eclubprague.cardashboard.core.preferences.SettingsActivity;
-import com.eclubprague.cardashboard.core.utils.ListUtils;
+import com.eclubprague.cardashboard.core.utils.ErrorReporter;
+import com.eclubprague.cardashboard.core.utils.ModuleUtils;
 import com.eclubprague.cardashboard.core.views.ModuleView;
 import com.eclubprague.cardashboard.tablet.R;
 import com.eclubprague.cardashboard.tablet.adapters.ModuleFragmentAdapter;
@@ -54,6 +57,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     private List<IModule> modules;
     private IParentModule parentModule;
     private IParentModule topParent;
+    private ModuleView toggledView;
 
     private int page = DEFAULT_PAGE;
 
@@ -89,6 +93,10 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
         // determine size
         IParentModule module = getParentModule(savedInstanceState, KEY_PARENT_MODULE);
         topParent = getParentModule(savedInstanceState, KEY_PREVIOUS_PARENT_MODULE);
+//        GlobalApplication.getInstance().setModuleContext(this);
+//        for (IActivityStateChangeListener listener : module.getSubmodules()) {
+//            listener.onStart(this);
+//        }
         setModule(module);
     }
 
@@ -214,13 +222,25 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     @Override
     protected void onPause() {
         super.onPause();
+
+
         for (IActivityStateChangeListener listener : modules) {
             listener.onPause(this);
         }
         try {
-            ModuleSupplier.getPersonalInstance().save(this);
+            IParentModule parentModule = ModuleSupplier.getPersonalInstance().getHomeScreenModule(this);
+            // copy without empty modules
+            parentModule = ModuleUtils.forEachDeepCopy(parentModule, new ModuleUtils.Action() {
+                @Override
+                public IModule performAction(IModule module) {
+                    IParentModule p = (IParentModule) module;
+                    p.removeTailEmptyModules();
+                    return p;
+                }
+            }, ModuleType.PARENT);
+            ModuleDAO.saveParentModuleAsync(this, parentModule);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            ErrorReporter.reportApplicationError(null, null, null, null);
         }
     }
 
@@ -278,6 +298,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
             if (holder.getDisplayedChild() != 1) {
                 holder.setDisplayedChild(1);
             }
+            toggledView = moduleView;
 //            Log.d(TAG, "Toggling quick menu: activating, content: " + holder.getChildCount());
 //            for (int i = 0; i < holder.getChildCount(); i++) {
 //                Log.d(TAG, "child at " + i + ": " + holder.getChildAt(i));
@@ -294,11 +315,14 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
 
     @Override
     public void turnQuickMenusOff() {
-        for (IModule module : modules) {
-            for (ModuleView moduleView : module.getViews(this)) {
-                module.onEvent(ModuleEvent.CANCEL, moduleView, this);
-            }
+        if (toggledView != null) {
+            toggledView.getModule().onEvent(ModuleEvent.CANCEL, toggledView, this);
         }
+//        for (IModule module : modules) {
+//            for (ModuleView moduleView : module.getViews(this)) {
+//                module.onEvent(ModuleEvent.CANCEL, moduleView, this);
+//            }
+//        }
     }
 
     @Override
@@ -323,17 +347,34 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
 
     @Override
     public void onModuleEvent(final IModule module, ModuleView moduleView, ModuleEvent event) {
-        final int indexOf = ListUtils.getNthIndexOf(modules, module, module.getViews(this).indexOf(moduleView));
+//        Log.d(TAG, "=====================================================================");
+//        Log.d(TAG, "=====================================================================");
+//        Log.d(TAG, "EVENT = " + event.name());
+//        Log.d(TAG, "=====================================================================");
+//        Log.d(TAG, "=====================================================================");
+
         switch (event) {
             case CANCEL:
                 toggleQuickMenu(module, moduleView, false);
                 break;
             case DELETE:
+//                Log.d(TAG, "looking for module: " + module);
+//                Log.d(TAG, "index of view inside module: " + module.getViews(this).indexOf(moduleView));
+//                Log.d(TAG, "ModuleViews: ");
+//                List<ModuleView> moduleViews = module.getViews(this);
+//                for (int i = 0; i < moduleViews.size(); i++) {
+//                    Log.d(TAG, i + ". moduleView = " + moduleViews.get(i));
+//                }
+//                Log.d(TAG, "list:");
+//                for (int i = 0; i < modules.size(); i++) {
+//                    Log.d(TAG, i + ". module = " + modules.get(i));
+//                }
 //                for(IModule m : modules){
 //                    Log.d(TAG, "module: " + m.getId() + ", title = " + m.getTitle().getString(this));
 //                }
 //                Log.d(TAG, "removing module {" + module.getTitle().getString(this) + "}: " + module.toString());
-                modules.set(indexOf, new EmptyModule());
+//                modules.set(ListUtils.getNthIndexOf(modules, module, module.getViews(this).indexOf(moduleView)), new EmptyModule());
+                modules.set(parentModule.getSubmodules().indexOf(module), ModuleEnum.EMPTY.newInstance());
                 restart();
                 break;
             case MOVE:
@@ -342,6 +383,8 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
                 toggleQuickMenu(module, moduleView, false);
                 break;
             case ADD:
+//                final int indexOf = ListUtils.getNthIndexOf(modules, module, module.getViews(this).indexOf(moduleView));
+                final int indexOf = parentModule.getSubmodules().indexOf(module);
                 ModuleListDialogFragment dialog = ModuleListDialogFragment.newInstance(this, new ModuleListDialogFragment.OnAddModuleListener() {
                     @Override
                     public void addModule(IModule newModule) {
@@ -377,6 +420,9 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
         Intent intent = new Intent(this, SimplePagerActivity.class);
         intent.putExtra(SimplePagerActivity.KEY_PARENT_MODULE, parentModule.getId());
         intent.putExtra(KEY_PAGE, viewPager.getCurrentItem());
+        for (IActivityStateChangeListener listener : modules) {
+            listener.onDestroy(this);
+        }
         startActivity(intent);
         finish();
     }
