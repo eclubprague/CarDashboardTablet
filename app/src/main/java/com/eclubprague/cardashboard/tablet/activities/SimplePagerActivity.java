@@ -116,7 +116,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(Configuration newConfig) { // restart when changed orientation and stuff
         super.onConfigurationChanged(newConfig);
         restart();
     }
