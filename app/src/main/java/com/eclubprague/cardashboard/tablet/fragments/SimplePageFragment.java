@@ -159,7 +159,7 @@ public class SimplePageFragment extends Fragment {
                 ModuleView v = viewWithHolder.view;
 //                Log.d(TAG, "Got view of module: " + module);
 //                Log.d(TAG, "which is: " + v);
-                viewHolder.addView(module.createQuickMenuView(v, moduleContext, viewHolder));
+                viewHolder.addView(module.createQuickMenuView(moduleContext, viewHolder));
                 view = viewHolder;
                 view.setOnClickListener(new View.OnClickListener() {
                     @Override

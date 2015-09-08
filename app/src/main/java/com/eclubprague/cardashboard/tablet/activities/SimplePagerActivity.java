@@ -17,19 +17,19 @@ import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
 import android.widget.ViewSwitcher;
 
-import com.eclubprague.cardashboard.core.application.GlobalApplication;
+import com.eclubprague.cardashboard.core.application.GlobalDataProvider;
 import com.eclubprague.cardashboard.core.data.ModuleSupplier;
 import com.eclubprague.cardashboard.core.data.database.ModuleDAO;
 import com.eclubprague.cardashboard.core.data.modules.ModuleEnum;
 import com.eclubprague.cardashboard.core.data.modules.ModuleType;
 import com.eclubprague.cardashboard.core.fragments.ModuleListDialogFragment;
+import com.eclubprague.cardashboard.core.model.resources.StringResource;
 import com.eclubprague.cardashboard.core.modules.base.IActivityStateChangeListener;
 import com.eclubprague.cardashboard.core.modules.base.IModule;
 import com.eclubprague.cardashboard.core.modules.base.IModuleContext;
 import com.eclubprague.cardashboard.core.modules.base.IParentModule;
 import com.eclubprague.cardashboard.core.modules.base.ModuleEvent;
 import com.eclubprague.cardashboard.core.modules.base.models.ModuleId;
-import com.eclubprague.cardashboard.core.modules.base.models.resources.StringResource;
 import com.eclubprague.cardashboard.core.modules.predefined.BackModule;
 import com.eclubprague.cardashboard.core.preferences.SettingsActivity;
 import com.eclubprague.cardashboard.core.utils.ErrorReporter;
@@ -65,7 +65,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_simple_pager);
-        GlobalApplication.getInstance().setModuleContext(this);
+        GlobalDataProvider.getInstance().setModuleContext(this);
 //        viewPager = new ViewPager(this);
 //        ViewGroup root = (ViewGroup) findViewById(R.id.simplepager_root_layout);
 //        viewPager.setId(R.id.viewpager);
@@ -93,7 +93,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
         // determine size
         IParentModule module = getParentModule(savedInstanceState, KEY_PARENT_MODULE);
         topParent = getParentModule(savedInstanceState, KEY_PREVIOUS_PARENT_MODULE);
-//        GlobalApplication.getInstance().setModuleContext(this);
+//        GlobalDataProvider.getInstance().setModuleContext(this);
 //        for (IActivityStateChangeListener listener : module.getSubmodules()) {
 //            listener.onStart(this);
 //        }
@@ -204,7 +204,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     @Override
     protected void onStart() {
         super.onStart();
-        GlobalApplication.getInstance().setModuleContext(this);
+        GlobalDataProvider.getInstance().setModuleContext(this);
         for (IActivityStateChangeListener listener : modules) {
             listener.onStart(this);
         }
@@ -213,7 +213,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     @Override
     protected void onResume() {
         super.onResume();
-        GlobalApplication.getInstance().setModuleContext(this);
+        GlobalDataProvider.getInstance().setModuleContext(this);
         for (IActivityStateChangeListener listener : modules) {
             listener.onResume(this);
         }
