@@ -13,6 +13,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
 import android.widget.ViewSwitcher;
@@ -291,20 +292,19 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     }
 
     @Override
-    public void toggleQuickMenu(IModule module, ModuleView moduleView, boolean activate) {
+    public void toggleQuickMenu(IModule module, boolean activate) {
+        ViewSwitcher holder = (ViewSwitcher) module.getHolder();
         if (activate) {
-            ViewSwitcher holder = (ViewSwitcher) moduleView.getViewHolder();
 //            holder.showNext();
             if (holder.getDisplayedChild() != 1) {
                 holder.setDisplayedChild(1);
             }
-            toggledView = moduleView;
+            toggledView = module.getView();
 //            Log.d(TAG, "Toggling quick menu: activating, content: " + holder.getChildCount());
 //            for (int i = 0; i < holder.getChildCount(); i++) {
 //                Log.d(TAG, "child at " + i + ": " + holder.getChildAt(i));
 //            }
         } else {
-            ViewSwitcher holder = (ViewSwitcher) moduleView.getViewHolder();
 //            holder.showPrevious();
             if (holder.getDisplayedChild() != 0) {
                 holder.setDisplayedChild(0);
@@ -316,7 +316,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     @Override
     public void turnQuickMenusOff() {
         if (toggledView != null) {
-            toggledView.getModule().onEvent(ModuleEvent.CANCEL, toggledView, this);
+            toggledView.getModule().onEvent(ModuleEvent.CANCEL, this);
         }
 //        for (IModule module : modules) {
 //            for (ModuleView moduleView : module.getViews(this)) {
@@ -346,7 +346,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     }
 
     @Override
-    public void onModuleEvent(final IModule module, ModuleView moduleView, ModuleEvent event) {
+    public void onModuleEvent(final IModule module, ModuleEvent event) {
 //        Log.d(TAG, "=====================================================================");
 //        Log.d(TAG, "=====================================================================");
 //        Log.d(TAG, "EVENT = " + event.name());
@@ -355,7 +355,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
 
         switch (event) {
             case CANCEL:
-                toggleQuickMenu(module, moduleView, false);
+                toggleQuickMenu(module, false);
                 break;
             case DELETE:
 //                Log.d(TAG, "looking for module: " + module);
@@ -380,7 +380,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
             case MOVE:
 //                View.DragShadowBuilder myShadow = new View.DragShadowBuilder(module.getViews());
 //                module.getHolder().startDrag(null, myShadow, null, 0);
-                toggleQuickMenu(module, moduleView, false);
+                toggleQuickMenu(module, false);
                 break;
             case ADD:
 //                final int indexOf = ListUtils.getNthIndexOf(modules, module, module.getViews(this).indexOf(moduleView));
@@ -402,6 +402,11 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     @Override
     public Activity getActivity() {
         return this;
+    }
+
+    @Override
+    public View getSnackbarHolder() {
+        return null;
     }
 
     protected void adjustModules(IParentModule parentModule, List<IModule> modules) {
