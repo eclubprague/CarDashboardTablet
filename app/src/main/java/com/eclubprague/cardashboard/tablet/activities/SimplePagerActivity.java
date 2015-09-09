@@ -13,7 +13,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
 import android.widget.ViewSwitcher;
@@ -405,8 +405,8 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     }
 
     @Override
-    public View getSnackbarHolder() {
-        return null;
+    public ViewGroup getSnackbarHolder() {
+        return (ViewGroup) findViewById(R.id.snackbar_container);
     }
 
     protected void adjustModules(IParentModule parentModule, List<IModule> modules) {
