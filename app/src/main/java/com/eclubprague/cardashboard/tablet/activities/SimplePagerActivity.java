@@ -35,6 +35,7 @@ import com.eclubprague.cardashboard.core.modules.predefined.BackModule;
 import com.eclubprague.cardashboard.core.preferences.SettingsActivity;
 import com.eclubprague.cardashboard.core.utils.ErrorReporter;
 import com.eclubprague.cardashboard.core.utils.ModuleUtils;
+import com.eclubprague.cardashboard.core.utils.TextToSpeech;
 import com.eclubprague.cardashboard.core.views.ModuleView;
 import com.eclubprague.cardashboard.tablet.R;
 import com.eclubprague.cardashboard.tablet.adapters.ModuleFragmentAdapter;
@@ -67,6 +68,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_simple_pager);
         GlobalDataProvider.getInstance().setModuleContext(this);
+        TextToSpeech.speak(null);
 //        viewPager = new ViewPager(this);
 //        ViewGroup root = (ViewGroup) findViewById(R.id.simplepager_root_layout);
 //        viewPager.setId(R.id.viewpager);
