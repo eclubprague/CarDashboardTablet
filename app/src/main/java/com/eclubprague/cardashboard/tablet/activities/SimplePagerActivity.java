@@ -89,7 +89,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
 //            ModuleDAO moduleDAO = new ModuleDAO(this);
 //            String data = moduleDAO.writeParentModule(ModuleSupplier.getBaseInstance().getHomeScreenModule(this));
 //            IParentModule parentModule = moduleDAO.readParentModule(data);
-//            goToSubmodules(parentModule);
+//            goToParentModule(parentModule);
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
@@ -101,6 +101,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
 //            listener.onStart(this);
 //        }
         setModule(module);
+        initPager();
     }
 
     private IParentModule getParentModule(Bundle savedInstanceState, String key) {
@@ -133,8 +134,6 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
 
     protected void initPager() {
         final IModuleContext thisModuleContext = this;
-        viewPager.setAdapter(null);
-//        Log.d(TAG, "recreating pager adapter");
         final RelativeLayout rootLayout = (RelativeLayout) findViewById(R.id.simplepager_root_layout);
         ViewTreeObserver observer = rootLayout.getViewTreeObserver();
         observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -145,25 +144,18 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
                 int availableWidth = viewPager.getWidth();
                 rootLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
-
                 CardSizeUtils.Size tableSize = CardSizeUtils.getTableSize(getApplicationContext(), availableHeight, availableWidth);
 
                 int columnCount = tableSize.width;
                 int rowCount = tableSize.height;
 
                 adjustModules(parentModule, modules);
-//                Log.d(TAG, "modules size = " + modules.size() + ", pageCount = " + getPageCount() + ", per page = " + getModulesPerPageCount());
-
-//                Log.d(TAG, "modules new size = " + modules.size());
-
                 pagerAdapter = new ModuleFragmentAdapter(getFragmentManager(), rowCount, columnCount, modules, thisModuleContext, parentModule);
-                Log.d(TAG, "recreating activity layout");
                 viewPager.setAdapter(pagerAdapter);
                 viewPager.setCurrentItem(page);
                 viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                     @Override
                     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
                     }
 
                     @Override
@@ -173,7 +165,6 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
 
                     @Override
                     public void onPageScrollStateChanged(int state) {
-
                     }
                 });
             }
@@ -189,18 +180,12 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -225,8 +210,6 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     @Override
     protected void onPause() {
         super.onPause();
-
-
         for (IActivityStateChangeListener listener : modules) {
             listener.onPause(this);
         }
@@ -268,33 +251,35 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     }
 
     protected void setModule(IParentModule parentModule) {
-        getActionBar().setTitle(parentModule.getTitle().getString(this));
-        getActionBar().setIcon(parentModule.getIcon().getIcon(this));
+        getActionBar().setTitle(parentModule.getTitle().getString(this)); // set bar title by parent module
+        getActionBar().setIcon(parentModule.getIcon().getIcon(this)); // set bar icon by parent module
         this.parentModule = parentModule;
-        this.parentModule.removeTailEmptyModules();
-        this.modules = this.parentModule.getSubmodules();
+        this.parentModule.removeTailEmptyModules(); // remove leftover empty modules
+        this.modules = this.parentModule.getSubmodules(); // get submodules of this parent module
 //        parentModule.removeTailEmptyModules();
-        initPager();
     }
 
+    /**
+     * Starts new activity with another parent module
+     *
+     * @param parentModule
+     */
     @Override
-    public void goToSubmodules(IParentModule parentModule) {
+    public void goToParentModule(IParentModule parentModule) {
         Intent intent = new Intent(this, SimplePagerActivity.class);
         intent.putExtra(SimplePagerActivity.KEY_PARENT_MODULE, parentModule.getId());
-        // DOES NOT WORK (problem with homescreen parent without a view, doesnt work anyway)
-//        String transitionName = getString(R.string.transition_card);
-//        Log.d(TAG, parentModule.toString());
-//        ActivityOptionsCompat options =
-//                ActivityOptionsCompat.makeSceneTransitionAnimation(this,
-//                        parentModule.getViews(),   // The view which starts the transition
-//                        transitionName    // The transitionName of the view we’re transitioning to
-//                );
-//        ActivityCompat.startActivity(this, intent, options.toBundle());
         startActivity(intent);
     }
 
+    /**
+     * Toggles quick menu for given module (on/off)
+     *
+     * @param module
+     * @param activate
+     */
     @Override
     public void toggleQuickMenu(IModule module, boolean activate) {
+        Log.d(TAG, "requesting toggle view (" + activate + ") for: " + module);
         ViewSwitcher holder = (ViewSwitcher) module.getHolder();
         if (activate) {
 //            holder.showNext();
@@ -311,6 +296,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
             if (holder.getDisplayedChild() != 0) {
                 holder.setDisplayedChild(0);
             }
+            toggledView = null;
 //            Log.d(TAG, "Toggling quick menu: deactivating, content: " + holder.getChildCount());
         }
     }
@@ -332,13 +318,14 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
         try {
             startActivity(intent);
         } catch (ActivityNotFoundException ex) {
+            // TODO change to ErrorReporter
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage(errorMessage.getString(this)).create().show();
         }
     }
 
     @Override
-    public void goBackFromSubmodules(IParentModule previousParentModule) {
+    public void goBackFromParentModule(IParentModule previousParentModule) {
         finish();
     }
 
@@ -354,7 +341,6 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
 //        Log.d(TAG, "EVENT = " + event.name());
 //        Log.d(TAG, "=====================================================================");
 //        Log.d(TAG, "=====================================================================");
-
         switch (event) {
             case CANCEL:
                 toggleQuickMenu(module, false);
@@ -379,12 +365,12 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
                 modules.set(parentModule.getSubmodules().indexOf(module), ModuleEnum.EMPTY.newInstance());
                 restart();
                 break;
-            case MOVE:
+            case MOVE: // does nothing, not implemented
 //                View.DragShadowBuilder myShadow = new View.DragShadowBuilder(module.getViews());
 //                module.getHolder().startDrag(null, myShadow, null, 0);
                 toggleQuickMenu(module, false);
                 break;
-            case ADD:
+            case ADD: // adds module to the list and restarts activity
 //                final int indexOf = ListUtils.getNthIndexOf(modules, module, module.getViews(this).indexOf(moduleView));
                 final int indexOf = parentModule.getSubmodules().indexOf(module);
                 ModuleListDialogFragment dialog = ModuleListDialogFragment.newInstance(this, new ModuleListDialogFragment.OnAddModuleListener() {
@@ -395,7 +381,6 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
                     }
                 });
                 dialog.show(getFragmentManager(), "Applist");
-//                restart();
                 break;
 
         }
@@ -411,6 +396,12 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
         return (ViewGroup) findViewById(R.id.snackbar_container);
     }
 
+    /**
+     * Adjusts modules (inserts Back modules if required)
+     *
+     * @param parentModule
+     * @param modules
+     */
     protected void adjustModules(IParentModule parentModule, List<IModule> modules) {
         if (!parentModule.equals(ModuleSupplier.getPersonalInstance().getHomeScreenModule(this))) {
             if (modules.size() > 0) {
@@ -423,6 +414,9 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
         }
     }
 
+    /**
+     * Restarts activity with all the required data
+     */
     private void restart() {
         Intent intent = new Intent(this, SimplePagerActivity.class);
         intent.putExtra(SimplePagerActivity.KEY_PARENT_MODULE, parentModule.getId());

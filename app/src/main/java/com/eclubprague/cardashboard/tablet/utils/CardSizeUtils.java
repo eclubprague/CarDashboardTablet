@@ -32,6 +32,16 @@ public class CardSizeUtils {
                 availableWidth / minWidthRequiredPerCard); // columns
     }
 
+    public static int getCardMargin(Context context) {
+        return context.getResources().getDimensionPixelSize(R.dimen.card_margin);
+    }
+
+    public static Size getCardSize(Context context) {
+        int height = context.getResources().getDimensionPixelSize(R.dimen.card_size);
+        int width = context.getResources().getDimensionPixelSize(R.dimen.card_size);
+        return new Size(height, width);
+    }
+
     /**
      * Returns Size containing maximum size of a card
      *

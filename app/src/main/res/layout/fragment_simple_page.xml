@@ -1,20 +1,8 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.eclubprague.cardashboard.tablet.view.GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.eclubprague.cardashboard.tablet.fragments.SimplePageFragment"
-    android:transitionName="@string/transition_card">
+    android:padding="@dimen/card_margin_side">
 
-    <GridView
-        android:id="@+id/fragment_page_grid"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:columnWidth="@dimen/card_size"
-        android:numColumns="auto_fit"
-        android:verticalSpacing="@dimen/card_margin"
-        android:horizontalSpacing="@dimen/card_margin"
-        android:gravity="center"
-        android:padding="@dimen/card_margin_side"
-        android:clipToPadding="false" />
-
-</FrameLayout>
+</com.eclubprague.cardashboard.tablet.view.GridLayout>

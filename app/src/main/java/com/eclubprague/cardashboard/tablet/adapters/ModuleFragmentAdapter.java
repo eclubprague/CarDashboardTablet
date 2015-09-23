@@ -56,7 +56,7 @@ public class ModuleFragmentAdapter extends FragmentStatePagerAdapter {
         if (modules == null) {
             throw new IllegalStateException("Module list is null.");
         }
-        return SimplePageFragment.newInstance(getSubModules(i), rowCount, columnCount);
+        return SimplePageFragment.newInstance(getSubModules(i));
     }
 
     @Override
@@ -68,11 +68,6 @@ public class ModuleFragmentAdapter extends FragmentStatePagerAdapter {
             count = ((int) Math.round(Math.ceil((double) modules.size() / (rowCount * columnCount)))) + 1;
         }
         return count;
-    }
-
-    @Override
-    public int getItemPosition(Object object) {
-        return POSITION_NONE;
     }
 
     private List<IModule> getSubModules(int page) {

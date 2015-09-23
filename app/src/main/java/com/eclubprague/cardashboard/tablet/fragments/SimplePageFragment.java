@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.ViewSwitcher;
 
 import com.eclubprague.cardashboard.core.modules.base.IModule;
@@ -17,6 +16,7 @@ import com.eclubprague.cardashboard.core.views.ModuleView;
 import com.eclubprague.cardashboard.tablet.R;
 import com.eclubprague.cardashboard.tablet.model.modules.IModuleContextTabletActivity;
 import com.eclubprague.cardashboard.tablet.utils.CardSizeUtils;
+import com.eclubprague.cardashboard.tablet.view.GridLayout;
 
 import java.util.List;
 
@@ -36,8 +36,6 @@ public class SimplePageFragment extends Fragment {
     private static final String TAG = SimplePageFragment.class.getSimpleName();
 
     private List<IModule> modules;
-    private int rowCount;
-    private int columnCount;
 
     private int availableWidth;
     private int availableHeight;
@@ -52,12 +50,10 @@ public class SimplePageFragment extends Fragment {
      *
      * @return A new instance of fragment SimplePageFragment.
      */
-    public static SimplePageFragment newInstance(List<IModule> modules, int rowCount, int columnCount) {
+    public static SimplePageFragment newInstance(List<IModule> modules) {
 //        Log.d(TAG, "recreating fragment: newInstance");
         SimplePageFragment fragment = new SimplePageFragment();
-        fragment.setModules(modules);
-        fragment.setRowCount(rowCount);
-        fragment.setColumnCount(columnCount);
+        fragment.modules = modules;
         return fragment;
     }
 
@@ -81,17 +77,36 @@ public class SimplePageFragment extends Fragment {
 //        for(IModule m : modules){
 //            sb.append(m.getTitle().getString(getActivity()));
 //        }
-        GridView gridView = (GridView) view.findViewById(R.id.fragment_page_grid);
+        availableWidth = container.getWidth();
+        availableHeight = container.getHeight();
+        GridLayout gridLayout = (GridLayout) view;
+        CardSizeUtils.Size cardSize = CardSizeUtils.getCardSize(getActivity());
+        gridLayout.init(availableHeight, availableWidth, cardSize.height, cardSize.width, CardSizeUtils.getCardMargin(getActivity()));
+
+//        ModuleAdapter adapter = new ModuleAdapter();
+//        for(int i = 0; i < adapter.getCount(); i++){
+//            gridLayout.setChildAt(i, adapter.getView(i, null, gridLayout));
+//        }
+
+//        ModuleAdapter adapter = new ModuleAdapter();
+//        for (int i = 0; i < adapter.getCount(); i++) {
+//            TextView tv = new TextView(getActivity());
+//            tv.setText("Test string");
+//            gridLayout.setChildAt(i, tv);
+//        }
+
+        ModuleAdapter adapter = new ModuleAdapter();
+        for (int i = 0; i < modules.size(); i++) {
+            gridLayout.setChildAt(i, adapter.getView(i, null, gridLayout));
+        }
 
 //        List<String> moduleNames = new ArrayList<>();
 //        for (IModule m : modules) {
 //            moduleNames.add(m.getTitle().getString(getActivity()));
 //        }
 //        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, moduleNames);
-        gridView.setAdapter(new ModuleAdapter());
+//        gridView.setAdapter(new ModuleAdapter());
 
-        availableWidth = container.getWidth();
-        availableHeight = container.getHeight();
         return view;
     }
 
@@ -112,18 +127,6 @@ public class SimplePageFragment extends Fragment {
         moduleContext = null;
     }
 
-    public void setModules(List<IModule> modules) {
-        this.modules = modules;
-    }
-
-    public void setRowCount(int rowCount) {
-        this.rowCount = rowCount;
-    }
-
-    public void setColumnCount(int columnCount) {
-        this.columnCount = columnCount;
-    }
-
     private CardSizeUtils.Size getOptimalCardSize() {
         if (optimalCardSize == null) {
             optimalCardSize = CardSizeUtils.getOptimalCardSize(getActivity(), availableHeight, availableWidth);
@@ -135,17 +138,17 @@ public class SimplePageFragment extends Fragment {
 
         @Override
         public int getCount() {
-            return rowCount * columnCount;
+            return modules.size();
         }
 
         @Override
         public Object getItem(int position) {
-            return null;
+            return modules.get(position);
         }
 
         @Override
         public long getItemId(int position) {
-            return 0;
+            return position;
         }
 
         @Override
@@ -153,7 +156,7 @@ public class SimplePageFragment extends Fragment {
             View view;
             if (convertView == null) {
 //                Log.d(TAG, modules.size() + " <= " + position);
-                IModule module = modules.get(position);
+                IModule module = (IModule) getItem(position);
                 ViewWithHolder<ModuleView> viewWithHolder = module.createViewWithHolder(moduleContext, R.layout.module_holder, parent);
                 ViewSwitcher viewHolder = (ViewSwitcher) viewWithHolder.holder;
                 ModuleView v = viewWithHolder.view;
@@ -199,9 +202,6 @@ public class SimplePageFragment extends Fragment {
             } else {
                 view = convertView;
             }
-            ViewSwitcher v = (ViewSwitcher) view;
-            ModuleView childAt = (ModuleView) v.getChildAt(0);
-            childAt.toString();
             return view;
         }
     }
