@@ -1,6 +1,7 @@
 package com.eclubprague.cardashboard.tablet.utils;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.eclubprague.cardashboard.tablet.R;
 
@@ -10,6 +11,8 @@ import com.eclubprague.cardashboard.tablet.R;
  * Created by Michael on 14. 7. 2015.
  */
 public class CardSizeUtils {
+
+    private static final String TAG = CardSizeUtils.class.getSimpleName();
 
     /**
      * Returns Size containing number of columns (as width) and number of rows (as height)
@@ -26,8 +29,18 @@ public class CardSizeUtils {
 
         availableHeight -= margin + 2 * borderMargin; // top spacing + top and bottom outer margin
         availableWidth -= margin + 2 * borderMargin; // left spacing + left and right outer margin
+//
+//        Log.d(TAG, "ah = " + availableHeight + ", aw = " + availableWidth);
+//
+//        Log.d(TAG, "min height = " + height + " + " + margin);
+//        Log.d(TAG, "min width = " + width + " + " + margin);
+
         int minHeightRequiredPerCard = height + margin;
         int minWidthRequiredPerCard = width + margin;
+
+//        Log.d(TAG, "rows = " + availableHeight + " / " + minHeightRequiredPerCard + " = " + (availableHeight / minHeightRequiredPerCard) );
+//        Log.d(TAG, "columns = " + availableWidth + " / " + minWidthRequiredPerCard + " = " + (availableWidth / minWidthRequiredPerCard) );
+
         return new Size(availableHeight / minHeightRequiredPerCard,// rows
                 availableWidth / minWidthRequiredPerCard); // columns
     }
@@ -70,6 +83,14 @@ public class CardSizeUtils {
         public Size(int height, int width) {
             this.height = height;
             this.width = width;
+        }
+
+        @Override
+        public String toString() {
+            return "Size{" +
+                    "height=" + height +
+                    ", width=" + width +
+                    '}';
         }
     }
 }

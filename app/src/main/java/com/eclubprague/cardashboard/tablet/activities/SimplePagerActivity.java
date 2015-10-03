@@ -36,6 +36,7 @@ import com.eclubprague.cardashboard.core.preferences.SettingsActivity;
 import com.eclubprague.cardashboard.core.utils.ErrorReporter;
 import com.eclubprague.cardashboard.core.utils.ModuleUtils;
 import com.eclubprague.cardashboard.core.utils.TextToSpeech;
+import com.eclubprague.cardashboard.core.utils.ThemeUtils;
 import com.eclubprague.cardashboard.core.views.ModuleView;
 import com.eclubprague.cardashboard.tablet.R;
 import com.eclubprague.cardashboard.tablet.adapters.ModuleFragmentAdapter;
@@ -43,7 +44,9 @@ import com.eclubprague.cardashboard.tablet.model.modules.IModuleContextTabletAct
 import com.eclubprague.cardashboard.tablet.utils.CardSizeUtils;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class SimplePagerActivity extends Activity implements IModuleContextTabletActivity {
 
@@ -52,6 +55,8 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     public static final String KEY_PARENT_MODULE = SimplePagerActivity.class.getName() + ".KEY_PARENT_MODULE";
     public static final String KEY_PREVIOUS_PARENT_MODULE = SimplePagerActivity.class.getName() + ".KEY_PREVIOUS_PARENT_MODULE";
     private static final int DEFAULT_PAGE = 0;
+
+    private static final Set<SimplePagerActivity> activitySet = new HashSet<>();
 
     private ViewPager viewPager;
     private PagerAdapter pagerAdapter;
@@ -64,22 +69,24 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     private int page = DEFAULT_PAGE;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_simple_pager);
-        GlobalDataProvider.getInstance().setModuleContext(this);
-        TextToSpeech.speak(null);
+    protected void onCreate( Bundle savedInstanceState ) {
+        super.onCreate( savedInstanceState );
+        activitySet.add( this );
+        setTheme( ThemeUtils.getCurrentTheme( this ).getResId() );
+        setContentView( R.layout.activity_simple_pager );
+        GlobalDataProvider.getInstance().setModuleContext( this );
+        TextToSpeech.speak( null );
 //        viewPager = new ViewPager(this);
 //        ViewGroup root = (ViewGroup) findViewById(R.id.simplepager_root_layout);
 //        viewPager.setId(R.id.viewpager);
 //        root.addView(viewPager);
-        viewPager = (ViewPager) findViewById(R.id.viewpager);
+        viewPager = (ViewPager) findViewById( R.id.viewpager );
 //        Log.d(TAG, "recreating activity");
-        if (savedInstanceState != null) {
-            page = savedInstanceState.getInt(KEY_PAGE, DEFAULT_PAGE);
-        } else if (getIntent() != null) {
+        if ( savedInstanceState != null ) {
+            page = savedInstanceState.getInt( KEY_PAGE, DEFAULT_PAGE );
+        } else if ( getIntent() != null ) {
             Intent intent = getIntent();
-            page = intent.getIntExtra(KEY_PAGE, DEFAULT_PAGE);
+            page = intent.getIntExtra( KEY_PAGE, DEFAULT_PAGE );
         } else {
             page = DEFAULT_PAGE;
         }
@@ -94,155 +101,158 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
 //            e.printStackTrace();
 //        }
         // determine size
-        IParentModule module = getParentModule(savedInstanceState, KEY_PARENT_MODULE);
-        topParent = getParentModule(savedInstanceState, KEY_PREVIOUS_PARENT_MODULE);
+        IParentModule module = getParentModule( savedInstanceState, KEY_PARENT_MODULE );
+        topParent = getParentModule( savedInstanceState, KEY_PREVIOUS_PARENT_MODULE );
 //        GlobalDataProvider.getInstance().setModuleContext(this);
 //        for (IActivityStateChangeListener listener : module.getSubmodules()) {
 //            listener.onStart(this);
 //        }
-        setModule(module);
+        setModule( module );
         initPager();
     }
 
-    private IParentModule getParentModule(Bundle savedInstanceState, String key) {
+    private IParentModule getParentModule( Bundle savedInstanceState, String key ) {
         IParentModule module;
-        if (savedInstanceState != null && savedInstanceState.getSerializable(key) != null) {
-            ModuleId parentModuleId = (ModuleId) savedInstanceState.getSerializable(key);
-            module = ModuleSupplier.getPersonalInstance().findSubmenuModule(this, parentModuleId);
-        } else if (getIntent() != null && getIntent().getSerializableExtra(key) != null) {
+        if ( savedInstanceState != null && savedInstanceState.getSerializable( key ) != null ) {
+            ModuleId parentModuleId = (ModuleId) savedInstanceState.getSerializable( key );
+            module = ModuleSupplier.getPersonalInstance().findSubmenuModule( this, parentModuleId );
+        } else if ( getIntent() != null && getIntent().getSerializableExtra( key ) != null ) {
             Intent intent = getIntent();
-            ModuleId parentModuleId = (ModuleId) intent.getSerializableExtra(key);
-            module = ModuleSupplier.getPersonalInstance().findSubmenuModule(this, parentModuleId);
+            ModuleId parentModuleId = (ModuleId) intent.getSerializableExtra( key );
+            module = ModuleSupplier.getPersonalInstance().findSubmenuModule( this, parentModuleId );
         } else {
-            module = ModuleSupplier.getPersonalInstance().getHomeScreenModule(this);
+            module = ModuleSupplier.getPersonalInstance().getHomeScreenModule( this );
         }
         return module;
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) { // restart when changed orientation and stuff
-        super.onConfigurationChanged(newConfig);
-        restart();
+    public void onConfigurationChanged( Configuration newConfig ) { // restartActivity when changed orientation and stuff
+        super.onConfigurationChanged( newConfig );
+        restartActivity();
     }
 
     @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putInt(KEY_PAGE, viewPager.getCurrentItem());
-        outState.putSerializable(KEY_PARENT_MODULE, getParentModule().getId());
-        super.onSaveInstanceState(outState);
+    protected void onSaveInstanceState( @NonNull Bundle outState ) {
+        outState.putInt( KEY_PAGE, viewPager.getCurrentItem() );
+        outState.putSerializable( KEY_PARENT_MODULE, getParentModule().getId() );
+        super.onSaveInstanceState( outState );
     }
 
     protected void initPager() {
         final IModuleContext thisModuleContext = this;
-        final RelativeLayout rootLayout = (RelativeLayout) findViewById(R.id.simplepager_root_layout);
+        final RelativeLayout rootLayout = (RelativeLayout) findViewById( R.id.simplepager_root_layout );
         ViewTreeObserver observer = rootLayout.getViewTreeObserver();
-        observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        observer.addOnGlobalLayoutListener( new ViewTreeObserver.OnGlobalLayoutListener() {
 
             @Override
             public void onGlobalLayout() {
                 int availableHeight = viewPager.getHeight();
                 int availableWidth = viewPager.getWidth();
-                rootLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                rootLayout.getViewTreeObserver().removeOnGlobalLayoutListener( this );
 
-                CardSizeUtils.Size tableSize = CardSizeUtils.getTableSize(getApplicationContext(), availableHeight, availableWidth);
+                CardSizeUtils.Size tableSize = CardSizeUtils.getTableSize( getApplicationContext(), availableHeight, availableWidth );
 
                 int columnCount = tableSize.width;
                 int rowCount = tableSize.height;
 
-                adjustModules(parentModule, modules);
-                pagerAdapter = new ModuleFragmentAdapter(getFragmentManager(), rowCount, columnCount, modules, thisModuleContext, parentModule);
-                viewPager.setAdapter(pagerAdapter);
-                viewPager.setCurrentItem(page);
-                viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+//                Log.d(TAG, "onMeasure: size = " + tableSize + " with available height = " + availableHeight + " and width = " + availableWidth);
+
+                adjustModules( parentModule, modules );
+                pagerAdapter = new ModuleFragmentAdapter( getFragmentManager(), rowCount, columnCount, modules, thisModuleContext, parentModule );
+                viewPager.setAdapter( pagerAdapter );
+                viewPager.setCurrentItem( page );
+                viewPager.addOnPageChangeListener( new ViewPager.OnPageChangeListener() {
                     @Override
-                    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                    public void onPageScrolled( int position, float positionOffset, int positionOffsetPixels ) {
                     }
 
                     @Override
-                    public void onPageSelected(int position) {
+                    public void onPageSelected( int position ) {
                         turnQuickMenusOff();
                     }
 
                     @Override
-                    public void onPageScrollStateChanged(int state) {
+                    public void onPageScrollStateChanged( int state ) {
                     }
-                });
+                } );
             }
-        });
+        } );
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu( Menu menu ) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_simple_pager, menu);
+        getMenuInflater().inflate( R.menu.menu_simple_pager, menu );
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected( MenuItem item ) {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            Intent intent = new Intent(this, SettingsActivity.class);
-            startActivity(intent);
+        if ( id == R.id.action_settings ) {
+            Intent intent = new Intent( this, SettingsActivity.class );
+            startActivity( intent );
             return true;
         }
-        return super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected( item );
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        GlobalDataProvider.getInstance().setModuleContext(this);
-        for (IActivityStateChangeListener listener : modules) {
-            listener.onStart(this);
+        GlobalDataProvider.getInstance().setModuleContext( this );
+        for ( IActivityStateChangeListener listener : modules ) {
+            listener.onStart( this );
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        GlobalDataProvider.getInstance().setModuleContext(this);
-        for (IActivityStateChangeListener listener : modules) {
-            listener.onResume(this);
+        GlobalDataProvider.getInstance().setModuleContext( this );
+        for ( IActivityStateChangeListener listener : modules ) {
+            listener.onResume( this );
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        for (IActivityStateChangeListener listener : modules) {
-            listener.onPause(this);
+        for ( IActivityStateChangeListener listener : modules ) {
+            listener.onPause( this );
         }
         try {
-            IParentModule parentModule = ModuleSupplier.getPersonalInstance().getHomeScreenModule(this);
+            IParentModule parentModule = ModuleSupplier.getPersonalInstance().getHomeScreenModule( this );
             // copy without empty modules
-            parentModule = ModuleUtils.forEachDeepCopy(parentModule, new ModuleUtils.Action() {
+            parentModule = ModuleUtils.forEachDeepCopy( parentModule, new ModuleUtils.Action() {
                 @Override
-                public IModule performAction(IModule module) {
+                public IModule performAction( IModule module ) {
                     IParentModule p = (IParentModule) module;
                     p.removeTailEmptyModules();
                     return p;
                 }
-            }, ModuleType.PARENT);
-            ModuleDAO.saveParentModuleAsync(this, parentModule);
-        } catch (IOException e) {
-            ErrorReporter.reportApplicationError(null, null, null, null);
+            }, ModuleType.PARENT );
+            ModuleDAO.saveParentModuleAsync( this, parentModule );
+        } catch ( IOException e ) {
+            ErrorReporter.reportApplicationError( null, null, null, null );
         }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        for (IActivityStateChangeListener listener : modules) {
-            listener.onStop(this);
+        for ( IActivityStateChangeListener listener : modules ) {
+            listener.onStop( this );
         }
     }
 
     @Override
     protected void onDestroy() {
-        for (IActivityStateChangeListener listener : modules) {
-            listener.onDestroy(this);
+        for ( IActivityStateChangeListener listener : modules ) {
+            listener.onDestroy( this );
         }
+        activitySet.remove( this );
         super.onDestroy();
     }
 
@@ -250,9 +260,10 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
         return parentModule;
     }
 
-    protected void setModule(IParentModule parentModule) {
-        getActionBar().setTitle(parentModule.getTitle().getString(this)); // set bar title by parent module
-        getActionBar().setIcon(parentModule.getIcon().getIcon(this)); // set bar icon by parent module
+    protected void setModule( IParentModule parentModule ) {
+        Log.d( TAG, "setting parent: " + parentModule );
+        getActionBar().setTitle( parentModule.getTitle().getString( this ) ); // set bar title by parent module
+        getActionBar().setIcon( parentModule.getIcon().getIcon( this ) ); // set bar icon by parent module
         this.parentModule = parentModule;
         this.parentModule.removeTailEmptyModules(); // remove leftover empty modules
         this.modules = this.parentModule.getSubmodules(); // get submodules of this parent module
@@ -265,10 +276,10 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
      * @param parentModule
      */
     @Override
-    public void goToParentModule(IParentModule parentModule) {
-        Intent intent = new Intent(this, SimplePagerActivity.class);
-        intent.putExtra(SimplePagerActivity.KEY_PARENT_MODULE, parentModule.getId());
-        startActivity(intent);
+    public void goToParentModule( IParentModule parentModule ) {
+        Intent intent = new Intent( this, SimplePagerActivity.class );
+        intent.putExtra( SimplePagerActivity.KEY_PARENT_MODULE, parentModule.getId() );
+        startActivity( intent );
     }
 
     /**
@@ -278,13 +289,13 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
      * @param activate
      */
     @Override
-    public void toggleQuickMenu(IModule module, boolean activate) {
-        Log.d(TAG, "requesting toggle view (" + activate + ") for: " + module);
+    public void toggleQuickMenu( IModule module, boolean activate ) {
+        Log.d( TAG, "requesting toggle view (" + activate + ") for: " + module );
         ViewSwitcher holder = (ViewSwitcher) module.getHolder();
-        if (activate) {
+        if ( activate ) {
 //            holder.showNext();
-            if (holder.getDisplayedChild() != 1) {
-                holder.setDisplayedChild(1);
+            if ( holder.getDisplayedChild() != 1 ) {
+                holder.setDisplayedChild( 1 );
             }
             toggledView = module.getView();
 //            Log.d(TAG, "Toggling quick menu: activating, content: " + holder.getChildCount());
@@ -293,8 +304,8 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
 //            }
         } else {
 //            holder.showPrevious();
-            if (holder.getDisplayedChild() != 0) {
-                holder.setDisplayedChild(0);
+            if ( holder.getDisplayedChild() != 0 ) {
+                holder.setDisplayedChild( 0 );
             }
             toggledView = null;
 //            Log.d(TAG, "Toggling quick menu: deactivating, content: " + holder.getChildCount());
@@ -303,8 +314,8 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
 
     @Override
     public void turnQuickMenusOff() {
-        if (toggledView != null) {
-            toggledView.getModule().onEvent(ModuleEvent.CANCEL, this);
+        if ( toggledView != null ) {
+            toggledView.getModule().onEvent( ModuleEvent.CANCEL, this );
         }
 //        for (IModule module : modules) {
 //            for (ModuleView moduleView : module.getViews(this)) {
@@ -314,19 +325,20 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     }
 
     @Override
-    public void launchIntent(Intent intent, StringResource errorMessage) {
+    public void launchIntent( Intent intent, StringResource errorMessage ) {
         try {
-            startActivity(intent);
-        } catch (ActivityNotFoundException ex) {
+            startActivity( intent );
+        } catch ( ActivityNotFoundException ex ) {
             // TODO change to ErrorReporter
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage(errorMessage.getString(this)).create().show();
+            AlertDialog.Builder builder = new AlertDialog.Builder( this );
+            builder.setMessage( errorMessage.getString( this ) ).create().show();
         }
     }
 
     @Override
-    public void goBackFromParentModule(IParentModule previousParentModule) {
-        finish();
+    public void goBackFromParentModule( IParentModule previousParentModule ) {
+        goToParentModule( previousParentModule );
+//        finish();
     }
 
     @Override
@@ -335,15 +347,15 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     }
 
     @Override
-    public void onModuleEvent(final IModule module, ModuleEvent event) {
+    public void onModuleEvent( final IModule module, ModuleEvent event ) {
 //        Log.d(TAG, "=====================================================================");
 //        Log.d(TAG, "=====================================================================");
 //        Log.d(TAG, "EVENT = " + event.name());
 //        Log.d(TAG, "=====================================================================");
 //        Log.d(TAG, "=====================================================================");
-        switch (event) {
+        switch ( event ) {
             case CANCEL:
-                toggleQuickMenu(module, false);
+                toggleQuickMenu( module, false );
                 break;
             case DELETE:
 //                Log.d(TAG, "looking for module: " + module);
@@ -362,25 +374,25 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
 //                }
 //                Log.d(TAG, "removing module {" + module.getTitle().getString(this) + "}: " + module.toString());
 //                modules.set(ListUtils.getNthIndexOf(modules, module, module.getViews(this).indexOf(moduleView)), new EmptyModule());
-                modules.set(parentModule.getSubmodules().indexOf(module), ModuleEnum.EMPTY.newInstance());
-                restart();
+                modules.set( parentModule.getSubmodules().indexOf( module ), ModuleEnum.EMPTY.newInstance() );
+                restartActivity();
                 break;
             case MOVE: // does nothing, not implemented
 //                View.DragShadowBuilder myShadow = new View.DragShadowBuilder(module.getViews());
 //                module.getHolder().startDrag(null, myShadow, null, 0);
-                toggleQuickMenu(module, false);
+                toggleQuickMenu( module, false );
                 break;
             case ADD: // adds module to the list and restarts activity
 //                final int indexOf = ListUtils.getNthIndexOf(modules, module, module.getViews(this).indexOf(moduleView));
-                final int indexOf = parentModule.getSubmodules().indexOf(module);
-                ModuleListDialogFragment dialog = ModuleListDialogFragment.newInstance(this, new ModuleListDialogFragment.OnAddModuleListener() {
+                final int indexOf = parentModule.getSubmodules().indexOf( module );
+                ModuleListDialogFragment dialog = ModuleListDialogFragment.newInstance( this, new ModuleListDialogFragment.OnAddModuleListener() {
                     @Override
-                    public void addModule(IModule newModule) {
-                        modules.set(indexOf, newModule);
-                        restart();
+                    public void addModule( IModule newModule ) {
+                        modules.set( indexOf, newModule );
+                        restartActivity();
                     }
-                });
-                dialog.show(getFragmentManager(), "Applist");
+                } );
+                dialog.show( getFragmentManager(), "Applist" );
                 break;
 
         }
@@ -393,7 +405,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
 
     @Override
     public ViewGroup getSnackbarHolder() {
-        return (ViewGroup) findViewById(R.id.snackbar_container);
+        return (ViewGroup) findViewById( R.id.snackbar_container );
     }
 
     /**
@@ -402,14 +414,14 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
      * @param parentModule
      * @param modules
      */
-    protected void adjustModules(IParentModule parentModule, List<IModule> modules) {
-        if (!parentModule.equals(ModuleSupplier.getPersonalInstance().getHomeScreenModule(this))) {
-            if (modules.size() > 0) {
-                if (!(modules.get(0) instanceof BackModule)) {
-                    modules.add(0, new BackModule(parentModule));
+    protected void adjustModules( IParentModule parentModule, List<IModule> modules ) {
+        if ( !parentModule.equals( ModuleSupplier.getPersonalInstance().getHomeScreenModule( this ) ) ) {
+            if ( modules.size() > 0 ) {
+                if ( !( modules.get( 0 ) instanceof BackModule ) ) {
+                    modules.add( 0, new BackModule( topParent ) );
                 }
             } else {
-                modules.add(new BackModule(parentModule));
+                modules.add( new BackModule( topParent ) );
             }
         }
     }
@@ -417,14 +429,37 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     /**
      * Restarts activity with all the required data
      */
-    private void restart() {
-        Intent intent = new Intent(this, SimplePagerActivity.class);
-        intent.putExtra(SimplePagerActivity.KEY_PARENT_MODULE, parentModule.getId());
-        intent.putExtra(KEY_PAGE, viewPager.getCurrentItem());
-        for (IActivityStateChangeListener listener : modules) {
-            listener.onDestroy(this);
+    public void restartActivity() {
+        Log.d(TAG, "Restarting activity");
+        Intent intent = new Intent( this, SimplePagerActivity.class );
+        intent.putExtra( SimplePagerActivity.KEY_PARENT_MODULE, parentModule.getId() );
+        intent.putExtra( KEY_PAGE, viewPager.getCurrentItem() );
+        for ( IActivityStateChangeListener listener : modules ) {
+            listener.onDestroy( this );
         }
-        startActivity(intent);
+        startActivity( intent );
+        finish();
+    }
+
+    @Override
+    public void restartApplication() {
+        Log.d( TAG, "Restarting application" );
+        Intent intent = getBaseContext().getPackageManager()
+            .getLaunchIntentForPackage( getBaseContext().getPackageName() );
+        intent.addFlags( Intent.FLAG_ACTIVITY_CLEAR_TOP );
+        intent.putExtra( SimplePagerActivity.KEY_PARENT_MODULE, parentModule.getId() );
+        intent.putExtra( KEY_PAGE, viewPager.getCurrentItem() );
+        for ( IActivityStateChangeListener listener : modules ) {
+            listener.onDestroy( this );
+        }
+        SimplePagerActivity[] arr = new SimplePagerActivity[activitySet.size()];
+        arr = activitySet.toArray(arr);
+        for(int i = 0; i < arr.length; i++){
+            if(!arr[i].equals( this )){
+                arr[i].finish();
+            }
+        }
+        startActivity( intent );
         finish();
     }
 }

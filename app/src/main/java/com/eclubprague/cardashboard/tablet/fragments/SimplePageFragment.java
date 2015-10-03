@@ -12,13 +12,20 @@ import android.widget.ViewSwitcher;
 import com.eclubprague.cardashboard.core.modules.base.IModule;
 import com.eclubprague.cardashboard.core.modules.base.IModuleContext;
 import com.eclubprague.cardashboard.core.modules.base.models.ViewWithHolder;
+import com.eclubprague.cardashboard.core.modules.predefined.BackModule;
+import com.eclubprague.cardashboard.core.modules.predefined.EmptyModule;
 import com.eclubprague.cardashboard.core.views.ModuleView;
 import com.eclubprague.cardashboard.tablet.R;
 import com.eclubprague.cardashboard.tablet.model.modules.IModuleContextTabletActivity;
+import com.eclubprague.cardashboard.tablet.settings.ShowcaseManager;
 import com.eclubprague.cardashboard.tablet.utils.CardSizeUtils;
 import com.eclubprague.cardashboard.tablet.view.GridLayout;
 
 import java.util.List;
+
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
+import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -34,6 +41,12 @@ public class SimplePageFragment extends Fragment {
     public static final String KEY_COLUMN_COUNT = "columnCount";
 
     private static final String TAG = SimplePageFragment.class.getSimpleName();
+    private static final String SHOWCASE_ID = SimplePageFragment.class.getName();
+
+    private static final String SHOWCASE_ID_MODULE = SHOWCASE_ID;
+    private static final String SHOWCASE_ID_EMPTY = SHOWCASE_ID + EmptyModule.class.getSimpleName();
+    private static final String SHOWCASE_ID_BACK = SHOWCASE_ID + BackModule.class.getSimpleName();
+
 
     private List<IModule> modules;
 
@@ -99,6 +112,40 @@ public class SimplePageFragment extends Fragment {
         for (int i = 0; i < modules.size(); i++) {
             gridLayout.setChildAt(i, adapter.getView(i, null, gridLayout));
         }
+
+//        ShowcaseConfig config = new ShowcaseConfig();
+//        config.setDelay(500); // half second between each showcase view
+//        MaterialShowcaseSequence sequence = new MaterialShowcaseSequence(getActivity(), SHOWCASE_ID);
+//        sequence.setConfig(config);
+//
+//        sequence.start();
+//
+//        long delay = 500;
+//        boolean moduleSet = ShowcaseManager.getBoolean(SHOWCASE_ID_MODULE);
+//        boolean emptySet = ShowcaseManager.getBoolean(SHOWCASE_ID_EMPTY);
+//        boolean backSet = ShowcaseManager.getBoolean(SHOWCASE_ID_BACK);
+//        for(int i = 0; i < modules.size(); i++){
+//            if(moduleSet && backSet && emptySet){
+//                break;
+//            }
+//            IModule module = modules.get(i);
+//            if(module instanceof EmptyModule){
+//                sequence.addSequenceItem(module.getView(),
+//                        "This is button one", "GOT IT");
+//                emptySet = true;
+//                ShowcaseManager.putBoolean(SHOWCASE_ID_EMPTY, true);
+//            } else if(module instanceof BackModule) {
+//                sequence.addSequenceItem(module.getView(),
+//                        "This is button one", "GOT IT");
+//                backSet = true;
+//                ShowcaseManager.putBoolean(SHOWCASE_ID_BACK, true);
+//            }else {
+//                sequence.addSequenceItem(module.getView(),
+//                        "This is button one", "GOT IT");
+//                moduleSet = true;
+//                ShowcaseManager.putBoolean(SHOWCASE_ID_MODULE, true);
+//            }
+//        }
 
 //        List<String> moduleNames = new ArrayList<>();
 //        for (IModule m : modules) {

@@ -2,6 +2,7 @@ package com.eclubprague.cardashboard.tablet.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -36,15 +37,7 @@ public class GridLayout extends ViewGroup {
     }
 
     public GridLayout init(int height, int width, int childHeight, int childWidth) {
-        this.height = height;
-        this.width = width;
-        this.childHeight = childHeight;
-        this.childWidth = childWidth;
-        this.space = 0;
-        this.columns = width / childWidth;
-        this.rows = height / childHeight;
-        measure(width, height);
-        return this;
+        return init(height, width, childHeight, childWidth, 0);
     }
 
     public GridLayout init(int height, int width, int childHeight, int childWidth, int space) {
@@ -53,9 +46,11 @@ public class GridLayout extends ViewGroup {
         this.childHeight = childHeight;
         this.childWidth = childWidth;
         this.space = space;
-        this.columns = (width - space) / (childWidth + space);
-        this.rows = (height - space) / (childHeight + space);
-        measure(width, height);
+        this.columns = (width - space - getPaddingLeft() - getPaddingRight()) / (childWidth + space);
+        this.rows = (height - space - getPaddingTop() - getPaddingBottom()) / (childHeight + space);
+//        Log.d( TAG, "initializing gridview: " +  this);
+
+        measure( width, height );
         return this;
     }
 
@@ -97,25 +92,26 @@ public class GridLayout extends ViewGroup {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         final int count = getChildCount();
 
-        int currentHeight = height - getPaddingTop() - getPaddingBottom();
-        int currentWidth = width - getPaddingLeft() - getPaddingRight();
+        final int currentHeight = height - getPaddingTop() - getPaddingBottom();
+        final int currentWidth = width - getPaddingLeft() - getPaddingRight();
 //        Log.d(TAG, "creating grid layout with size: " + height + " / " + width);
 
         // These are the far left and right edges in which we are performing layout.
-        int leftPos = getPaddingLeft();
-        int rightPos = right - left - getPaddingRight();
+        final int leftPos = getPaddingLeft();
+        final int rightPos = right - left - getPaddingRight();
 
         // These are the top and bottom edges in which we are performing layout.
         final int topPos = getPaddingTop();
         final int bottomPos = bottom - top - getPaddingBottom();
 
-        int availableHeight = currentHeight / rows;
-        int availableWidth = currentWidth / columns;
+        final int availableHeight = currentHeight / rows;
+        final int availableWidth = currentWidth / columns;
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             if (child.getVisibility() != GONE) {
                 int column = getColumn(i);
                 int row = getRow(i);
+//                Log.d(TAG, "positioning child [" + i + ", " + column + ", " + row + "]");
 
                 int childLeft = leftPos + column * availableWidth + space + (availableWidth - childWidth) / 2;
                 int childTop = topPos + row * availableHeight + space + (availableHeight - childHeight) / 2;
@@ -129,11 +125,29 @@ public class GridLayout extends ViewGroup {
 
     }
 
+    @Override
+    public String toString() {
+        return "GridLayout{" +
+                "childHeight=" + childHeight +
+                ", width=" + width +
+                ", height=" + height +
+                ", childWidth=" + childWidth +
+                ", columns=" + columns +
+                ", rows=" + rows +
+                ", space=" + space +
+                '}';
+    }
+
     private int getRow(int position) {
         return position / columns;
     }
 
     private int getColumn(int position) {
+        Log.d(TAG, "getColumn for " + position + " while columns = " + columns);
+        if(columns == 1){
+            return 0;
+        }
+        Log.d(TAG, "getColumn returning some shit: " + position + " % " + columns + " = " + (position % columns));
         return position % columns;
     }
 
