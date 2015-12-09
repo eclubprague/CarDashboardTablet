@@ -21,8 +21,7 @@ import android.widget.ViewSwitcher;
 import com.eclubprague.cardashboard.core.application.GlobalDataProvider;
 import com.eclubprague.cardashboard.core.data.ModuleSupplier;
 import com.eclubprague.cardashboard.core.data.database.ModuleDAO;
-import com.eclubprague.cardashboard.core.data.modules.ModuleEnum;
-import com.eclubprague.cardashboard.core.data.modules.ModuleType;
+
 import com.eclubprague.cardashboard.core.fragments.ModuleListDialogFragment;
 import com.eclubprague.cardashboard.core.model.resources.StringResource;
 import com.eclubprague.cardashboard.core.modules.base.IActivityStateChangeListener;
@@ -32,6 +31,7 @@ import com.eclubprague.cardashboard.core.modules.base.IParentModule;
 import com.eclubprague.cardashboard.core.modules.base.ModuleEvent;
 import com.eclubprague.cardashboard.core.modules.base.models.ModuleId;
 import com.eclubprague.cardashboard.core.modules.predefined.BackModule;
+import com.eclubprague.cardashboard.core.modules.predefined.EmptyModule;
 import com.eclubprague.cardashboard.core.preferences.SettingsActivity;
 import com.eclubprague.cardashboard.core.utils.ErrorReporter;
 import com.eclubprague.cardashboard.core.utils.ModuleUtils;
@@ -232,7 +232,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
                     p.removeTailEmptyModules();
                     return p;
                 }
-            }, ModuleType.PARENT );
+            }, IParentModule.class );
             ModuleDAO.saveParentModuleAsync( this, parentModule );
         } catch ( IOException e ) {
             ErrorReporter.reportApplicationError( null, null, null, null );
@@ -374,7 +374,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
 //                }
 //                Log.d(TAG, "removing module {" + module.getTitle().getString(this) + "}: " + module.toString());
 //                modules.set(ListUtils.getNthIndexOf(modules, module, module.getViews(this).indexOf(moduleView)), new EmptyModule());
-                modules.set( parentModule.getSubmodules().indexOf( module ), ModuleEnum.EMPTY.newInstance() );
+                modules.set( parentModule.getSubmodules().indexOf( module ), new EmptyModule() );
                 restartActivity();
                 break;
             case MOVE: // does nothing, not implemented
