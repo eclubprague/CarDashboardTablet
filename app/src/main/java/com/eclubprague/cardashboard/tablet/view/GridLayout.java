@@ -3,6 +3,7 @@ package com.eclubprague.cardashboard.tablet.view;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -126,6 +127,13 @@ public class GridLayout extends ViewGroup {
         }
 
     }
+
+/*    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        boolean ret =  super.onInterceptTouchEvent(ev);
+        Log.d(TAG, "onInterceptTouchEvent = " + ret);
+        return ret;
+    }*/
 
     @Override
     public String toString() {

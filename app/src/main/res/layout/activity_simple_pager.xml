@@ -9,18 +9,9 @@
     android:id="@+id/simplepager_root_layout"
     tools:context="com.eclubprague.cardashboard.tablet.activities.SimplePagerActivity">
 
-    <android.support.v4.view.ViewPager xmlns:android="http://schemas.android.com/apk/res/android"
+    <com.eclubprague.cardashboard.tablet.view.MyViewPager xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/viewpager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/snackbar_container" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/snackbar_container"></LinearLayout>
+        android:layout_height="match_parent"/>
 
 </RelativeLayout>
