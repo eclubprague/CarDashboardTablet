@@ -406,6 +406,7 @@ public class SimplePagerActivity extends Activity implements IModuleContextTable
     @Override
     public ViewGroup getSnackbarHolder() {
      //   return (ViewGroup) findViewById( R.id.snackbar_container );
+        return null;
     }
 
     /**
